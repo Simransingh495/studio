@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -8,9 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking, useDoc } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import type { BloodRequest, DonationMatch, User } from '@/lib/types';
+import type { BloodRequest, DonationMatch } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardList, Loader2, UserCheck, UserX, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
 
 export default function MyRequestsPage() {
@@ -40,7 +40,7 @@ export default function MyRequestsPage() {
   );
   const { data: requests, isLoading: isRequestsLoading } = useCollection<BloodRequest>(requestsQuery);
   
-  const requestIds = useMemoFirebase(() => requests ? requests.map(r => r.id) : [], [requests]);
+  const requestIds = useMemo(() => requests ? requests.map(r => r.id) : [], [requests]);
 
   const matchesQuery = useMemoFirebase(
     () => (user && requestIds && requestIds.length > 0) ? query(
@@ -89,7 +89,7 @@ export default function MyRequestsPage() {
             }
           }
 
-        } else {
+        } else if (response === 'rejected') {
           // Notify the donor that the offer was rejected
            const newNotification = {
               userId: match.donorId,

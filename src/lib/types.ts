@@ -64,9 +64,12 @@ export type Notification = {
 export type Donation = {
   id: string;
   donorId: string;
-  requestId: string;
-  donationDate: Timestamp;
+  requestId?: string; // Optional: Link to the specific request fulfilled
+  donorName: string;
+  bloodType: string;
   location: string;
+  donationDate: Timestamp;
 };
+
 
 export const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];

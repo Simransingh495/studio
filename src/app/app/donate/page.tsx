@@ -7,10 +7,10 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase, useUser, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, orderBy, where, getDocs, startAt, endAt, serverTimestamp } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, useUser, addDocumentNonBlocking, useDoc } from '@/firebase';
+import { collection, query, orderBy, where, getDocs, startAt, endAt, serverTimestamp, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { BloodRequest } from '@/lib/types';
+import type { BloodRequest, User } from '@/lib/types';
 import { HeartHandshake, LifeBuoy, Loader2, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as geofire from 'geofire-common';
@@ -29,6 +29,13 @@ export default function DonatePage() {
   const [activeRequests, setActiveRequests] = useState<RequestWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [donating, setDonating] = useState<string | null>(null);
+
+  const userDocRef = useMemoFirebase(
+    () => (currentUser ? doc(firestore, 'users', currentUser.uid) : null),
+    [firestore, currentUser]
+  );
+  const { data: currentUserData, isLoading: isUserDataLoading } = useDoc<User>(userDocRef);
+
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -53,6 +60,7 @@ export default function DonatePage() {
   }, [toast]);
   
   const fetchRequests = async (center?: geofire.Geopoint) => {
+      if (!firestore) return;
       setIsLoading(true);
       const requestsCollection = collection(firestore, 'bloodRequests');
       const radiusInM = 100 * 1000; // 100 km
@@ -127,25 +135,23 @@ export default function DonatePage() {
 
 
   const handleOfferDonation = (request: BloodRequest) => {
-    if (!currentUser || !firestore) return;
+    if (!currentUser || !firestore || !currentUserData) return;
     
     setDonating(request.id);
 
-    // 1. Create a DonationMatch document
     const matchCollection = collection(firestore, 'donationMatches');
     const newMatch = {
         requestId: request.id,
         requestUserId: request.userId,
         donorId: currentUser.uid,
-        donorName: currentUser.displayName || 'Anonymous Donor',
-        donorBloodType: 'Unknown', // In a real app, get this from donor's profile
-        donorLocation: 'Unknown', // and this
-        donorContactPhone: currentUser.phoneNumber || 'Not available',
+        donorName: `${currentUserData.firstName} ${currentUserData.lastName}`,
+        donorBloodType: currentUserData.bloodType,
+        donorLocation: currentUserData.location,
+        donorContactPhone: currentUserData.phoneNumber || 'Not available',
         matchDate: serverTimestamp(),
         status: 'pending',
     };
     
-    // 2. Create a notification for the patient
     const patientNotifCollection = collection(firestore, 'notifications');
     const newNotification = {
         userId: request.userId,
@@ -176,7 +182,7 @@ export default function DonatePage() {
     }
   }
 
-  const showLoading = isLoading || isUserLoading || (!location && !locationError);
+  const showLoading = isLoading || isUserLoading || isUserDataLoading || (!location && !locationError);
 
   return (
     <div className="space-y-6">
