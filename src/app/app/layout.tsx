@@ -36,7 +36,7 @@ const menuItems = [
     isCentral: true,
   },
   {
-    href: '/app/app/donate', // Placeholder, can be same as request for now
+    href: '/app/donate',
     label: 'Donate',
     icon: HeartHandshake,
   },
