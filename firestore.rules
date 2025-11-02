@@ -122,7 +122,7 @@ service cloud.firestore {
      * @description Controls access to donations.
      * @path /donations/{donationId}
      * @allow (create) Any authenticated user can create a donation record.
-     * @allow (list) Authenticated users can list donations.
+     * @allow (list) Authenticated users can list their own donations.
      * @allow (get) Only the donor can read their own donation record.
      * @deny (update, delete) No updates or deletes allowed.
      * @principle Allows creation of donation records, but restricts read access and prevents modification.
@@ -134,8 +134,9 @@ service cloud.firestore {
       // Allow a user to read their own donation records.
       allow get: if request.auth.uid == resource.data.donorId;
 
-      // Allow authenticated users to list donations. Client queries MUST filter by donorId.
-      allow list: if request.auth != null;
+      // Allow authenticated users to list ONLY their own donations.
+      // The client query MUST filter by donorId for this to be allowed.
+      allow list: if request.auth != null && request.query.get("donorId") == request.auth.uid;
 
       // Prevent updates and deletions to maintain data integrity.
       allow update, delete: if false;
@@ -156,14 +157,14 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid != request.resource.data.userId;
 
       // Allow a user to get their own notification.
-      allow get: if request.auth != null && request.auth.uid == resource.data.userId;
-      
+      allow get: if request.auth.uid == resource.data.userId;
+
       // Allow a user to list their own notifications.
       // The client query MUST enforce this by filtering where `userId` == `request.auth.uid`.
-      allow list: if request.auth != null;
+      allow list: if request.auth != null && request.query.get("userId") == request.auth.uid;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
-      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if request.auth.uid == resource.data.userId;
       
       // Prevent deletion.
       allow delete: if false;
