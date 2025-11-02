@@ -1,0 +1,172 @@
+/**
+ * @fileOverview Firestore Security Rules for BloodSync.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a user-ownership model for user profiles.
+ * Blood requests and donation matches are accessible with certain restrictions based on user roles and relationships.
+ * Notifications are stored in a central collection, but users can only read their own.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles. Only the authenticated user can read/write their own profile. Authenticated users can list other users to find donors.
+ * - /bloodRequests/{bloodRequestId}: Stores blood requests. Any authenticated user can create or read a blood request. Only the user who created the request can update or delete it.
+ * - /donationMatches/{donationMatchId}: Stores donation matches.  Any authenticated user can create a donation match. Only the involved users can update.
+ * - /donations/{donationId}: Stores donation records. Authenticated users can create donations. Users can only read their own donations.
+ * - /notifications/{notificationId}: Stores notifications for all users. Users can only read their own. Any authenticated user can create a notification for another user.
+ *
+ * Key Security Decisions:
+ * - Data validation is limited to ensuring ownership and relational integrity.
+ * - Denormalization is used to avoid expensive `get()` calls in security rules.
+ * - In this prototyping mode, data shape validation is relaxed to allow for rapid schema iteration.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces user-ownership for user profiles.
+     * @path /users/{userId}
+     * @allow (create, update, get, delete) if request.auth.uid == userId
+     * @deny (create, update, get, delete) if request.auth.uid != userId
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId} {
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      // Allow the user to read their own profile
+      allow get: if isOwner(userId);
+      // Allow any authenticated user to list users (e.g., for finding donors).
+      allow list: if request.auth != null;
+
+      // Allow the user to create their own profile if the userId matches the authenticated user's ID.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+
+      // Allow the user to update their own profile. Enforce immutability of the userId field.
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+
+      // Allow the user to delete their own profile
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to blood requests.
+     * @path /bloodRequests/{bloodRequestId}
+     * @allow (create) Any authenticated user can create a blood request.
+     * @allow (get, list) Any authenticated user can view any blood requests.
+     * @allow (update, delete) Only the user who created the request can update or delete it.
+     * @deny (update, delete) if request.auth.uid != resource.data.userId
+     * @principle Allows public read access but restricts write access to the owner.
+     */
+    match /bloodRequests/{bloodRequestId} {
+
+      function isOwner() {
+        return request.auth.uid == resource.data.userId;
+      }
+
+      function isExistingOwner() {
+        return isOwner() && resource != null;
+      }
+
+      // Allow any authenticated user to create a blood request.
+      allow create: if request.auth != null;
+
+      // Allow any authenticated user to read or list blood requests.
+      allow get, list: if request.auth != null;
+
+      // Allow only the owner (requesting user) to update the blood request.
+      allow update: if isExistingOwner();
+
+      // Allow only the owner (requesting user) to delete the blood request.
+      allow delete: if isExistingOwner();
+    }
+
+    /**
+     * @description Controls access to donation matches.
+     * @path /donationMatches/{donationMatchId}
+     * @allow (create) Any authenticated user can create a donation match.
+     * @allow (update) Only the requesting user or the donor can update the status.
+     * @deny (delete) No deletes allowed.
+     * @principle Allows creation of donation matches but restricts modification.
+     */
+    match /donationMatches/{donationMatchId} {
+
+      function isRequestOwner() {
+        return request.auth.uid == resource.data.requestUserId;
+      }
+
+      function isDonor() {
+        return request.auth.uid == resource.data.donorId;
+      }
+
+      // Allow any authenticated user to create a donation match.
+      allow create: if request.auth != null;
+
+      // Allow anyone to read or list donation matches
+      allow get, list: if request.auth != null;
+
+      // Allow only the involved parties to update the match (e.g., to accept/reject).
+      allow update: if isRequestOwner() || isDonor();
+
+      // Prevent deletion of donation matches.
+      allow delete: if false;
+    }
+    
+    /**
+     * @description Controls access to donations.
+     * @path /donations/{donationId}
+     * @allow (create) Any authenticated user can create a donation record.
+     * @allow (list) Authenticated users can list donations.
+     * @allow (get) Only the donor can read their own donation record.
+     * @deny (update, delete) No updates or deletes allowed.
+     * @principle Allows creation of donation records, but restricts read access and prevents modification.
+     */
+    match /donations/{donationId} {
+      // Allow any authenticated user to create a donation record.
+      allow create: if request.auth != null;
+
+      // Allow a user to read their own donation records.
+      // This supports querying for a user's donation history.
+      allow get: if request.auth.uid == resource.data.donorId;
+
+      // Allow authenticated users to list donations (e.g. for admin panels)
+      // This requires a query with a `where` clause in the client code.
+      allow list: if request.auth != null;
+
+      // Prevent updates and deletions to maintain data integrity.
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Controls access to notifications.
+     * @path /notifications/{notificationId}
+     * @allow (create) Any authenticated user can create a notification for another user.
+     * @allow (get, list) Users can only read notifications intended for them.
+     * @allow (update) Users can update the `isRead` status of their own notifications.
+     * @deny (delete) Deletion is not allowed.
+     * @principle Enables a centralized notification system while maintaining privacy.
+     */
+    match /notifications/{notificationId} {
+      
+      // Allow creation if the user is authenticated and is not sending a notification to themselves.
+      allow create: if request.auth != null && request.auth.uid != request.resource.data.userId;
+
+      // Allow get if the notification's userId matches the requester's UID.
+      allow get: if request.auth != null && request.auth.uid == resource.data.userId;
+      
+      // Allow list if the query is filtered by the user's UID.
+      allow list: if request.auth != null && request.query.where.userId == request.auth.uid;
+
+      // Allow a user to update their own notification (e.g., to mark it as read).
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      
+      // Prevent deletion.
+      allow delete: if false;
+    }
+  }
+}

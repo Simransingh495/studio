@@ -27,9 +27,13 @@ export default function NotificationsPage() {
   const { data: notifications, isLoading } = useCollection<Notification>(notificationsQuery);
 
   const handleMarkAsRead = async (notificationId: string) => {
-    if (!user) return;
+    if (!user || !firestore) return;
     const notifRef = doc(firestore, 'notifications', notificationId);
-    await updateDoc(notifRef, { isRead: true });
+    try {
+      await updateDoc(notifRef, { isRead: true });
+    } catch (e) {
+      console.error("Failed to mark notification as read", e);
+    }
   }
 
   return (
