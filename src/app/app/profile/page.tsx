@@ -13,11 +13,12 @@ import {
   List,
   LogOut,
   Settings,
-  Switch,
   Timer,
   User as UserIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Switch } from '@/components/ui/switch';
+
 
 export default function ProfilePage() {
   const { toast } = useToast();
