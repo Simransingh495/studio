@@ -98,7 +98,7 @@ export default function MyRequestsPage() {
 
       if (response === 'accepted' && requestDoc) {
         // Update the request status
-        await updateDoc(requestRef, { status: 'Fulfilled' }); // Mark as Fulfilled
+        await updateDoc(requestRef, { status: 'Fulfilled' }); 
 
         // Create a donation record for history
         const donationCollection = collection(firestore, 'donations');
@@ -108,13 +108,13 @@ export default function MyRequestsPage() {
           donorName: match.donorName,
           bloodType: requestDoc.bloodType,
           location: requestDoc.location,
-          donationDate: new Date(), // Use current date for the donation
+          donationDate: new Date(), 
         };
         await addDoc(donationCollection, newDonation);
         
         // Send SMS notification
         const message = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone} or ${requestDoc.contactEmail}.`;
-        await fetch('/api/send-sms', {
+        const smsResponse = await fetch('/api/send-sms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -123,10 +123,14 @@ export default function MyRequestsPage() {
           }),
         });
 
+        if (!smsResponse.ok) {
+            throw new Error('Failed to send acceptance SMS.');
+        }
+
         toast({
           title: 'Match Accepted!',
           description:
-            'The donor has been notified with your contact details.',
+            'The donor has been notified with your contact details via SMS.',
         });
 
         // Reject other pending offers for this request
@@ -149,7 +153,7 @@ export default function MyRequestsPage() {
       } else if (response === 'rejected') {
          // Send rejection SMS
         const message = `Your donation offer for request #${match.requestId.substring(0,5)} was not accepted this time. Thank you for your willingness to help.`;
-        await fetch('/api/send-sms', {
+        const smsResponse = await fetch('/api/send-sms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -158,9 +162,13 @@ export default function MyRequestsPage() {
           }),
         });
 
+        if (!smsResponse.ok) {
+            throw new Error('Failed to send rejection SMS.');
+        }
+
         toast({
           title: 'Offer Rejected',
-          description: 'The offer has been declined.',
+          description: 'The offer has been declined and the donor has been notified via SMS.',
         });
       }
     } catch (err: any) {

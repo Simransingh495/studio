@@ -5,9 +5,9 @@ export type User = {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string; // Ensured this is part of the user type
   role: 'donor' | 'patient' | 'admin';
   bloodType: string;
-  // Location can be a simple string for display, but we also store structured geo data
   location: string; 
   geohash?: string;
   lat?: number;
@@ -17,7 +17,6 @@ export type User = {
   healthConditions?: string;
   avatarUrl?: string;
   isDonor: boolean;
-  phoneNumber?: string;
 };
 
 export type BloodRequest = {
@@ -41,7 +40,7 @@ export type BloodRequest = {
 export type DonationMatch = {
     id: string;
     requestId: string;
-    requestUserId: string; // ID of the user who made the request
+    requestUserId: string; 
     donorId: string;
     donorName: string;
     donorLocation: string;
@@ -54,10 +53,10 @@ export type DonationMatch = {
 
 export type Notification = {
     id: string;
-    userId: string; // User who receives the notification
+    userId: string; 
     message: string;
     type: 'request_match' | 'offer_accepted' | 'offer_rejected';
-    relatedId: string; // ID of the request or match
+    relatedId: string; 
     isRead: boolean;
     createdAt: Timestamp;
 }
@@ -66,7 +65,7 @@ export type Notification = {
 export type Donation = {
   id: string;
   donorId: string;
-  requestId?: string; // Optional: Link to the specific request fulfilled
+  requestId?: string; 
   donorName: string;
   bloodType: string;
   location: string;

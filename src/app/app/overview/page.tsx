@@ -96,7 +96,7 @@ export default function OverviewPage() {
       // 2. Send the SMS notification via our API endpoint
       const message = `A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your request for ${request.bloodType} blood. Please go to "My Requests" in the app to accept.`;
       
-      await fetch('/api/send-sms', {
+      const smsResponse = await fetch('/api/send-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -104,6 +104,10 @@ export default function OverviewPage() {
           message: message,
         }),
       });
+
+      if (!smsResponse.ok) {
+        throw new Error('Failed to send SMS notification.');
+      }
 
       toast({
         title: 'Offer Sent!',
