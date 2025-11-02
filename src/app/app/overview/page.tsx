@@ -1,19 +1,28 @@
 'use client';
 
-import Image from 'next/image';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
-import { bloodRequests } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { BloodRequest } from '@/lib/types';
+import { LifeBuoy } from 'lucide-react';
 
 export default function OverviewPage() {
-  const recentRequests = bloodRequests.slice(0, 3);
+  const firestore = useFirestore();
+  const requestsCollection = useMemoFirebase(
+    () => collection(firestore, 'bloodRequests'),
+    [firestore]
+  );
+  const recentRequestsQuery = useMemoFirebase(
+    () => query(requestsCollection, orderBy('createdAt', 'desc'), limit(5)),
+    [requestsCollection]
+  );
+  const { data: recentRequests, isLoading } = useCollection<BloodRequest>(recentRequestsQuery);
 
   return (
     <div className="space-y-6">
@@ -28,7 +37,14 @@ export default function OverviewPage() {
 
       <div className="space-y-4">
         <h3 className="font-headline text-xl font-semibold">Recent Requests</h3>
-        {recentRequests.length > 0 ? (
+        {isLoading && (
+           <div className="space-y-4">
+             <Skeleton className="h-24 w-full" />
+             <Skeleton className="h-24 w-full" />
+             <Skeleton className="h-24 w-full" />
+           </div>
+        )}
+        {!isLoading && recentRequests && recentRequests.length > 0 ? (
           recentRequests.map((request) => (
             <Card key={request.id}>
               <CardContent className="flex items-center gap-4 p-4">
@@ -58,9 +74,13 @@ export default function OverviewPage() {
             </Card>
           ))
         ) : (
-           <p className="p-4 text-center text-muted-foreground">
-            No active blood requests right now.
-          </p>
+           !isLoading && <div className="text-center py-10 bg-card rounded-lg border">
+                <LifeBuoy className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 text-lg font-semibold">No Active Requests</p>
+                <p className="text-muted-foreground mt-2">
+                  No active blood requests right now. Check back later!
+                </p>
+          </div>
         )}
       </div>
     </div>

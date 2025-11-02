@@ -3,6 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +33,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { bloodTypes } from '@/lib/types';
+import { useAuth, useFirestore, addDocumentNonBlocking, useUser } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
 
 const formSchema = z.object({
   patientName: z.string().min(2, {
@@ -46,6 +50,9 @@ const formSchema = z.object({
 
 export default function RequestBloodPage() {
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,13 +67,41 @@ export default function RequestBloodPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: 'Request Submitted',
-      description: 'Your blood request has been broadcasted to nearby donors.',
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Authenticated',
+        description: 'You must be logged in to make a request.',
+      });
+      return;
+    }
+    setIsLoading(true);
+
+    const requestsCollection = collection(firestore, 'bloodRequests');
+    const newRequest = {
+      ...values,
+      userId: user.uid,
+      status: 'Pending',
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      addDocumentNonBlocking(requestsCollection, newRequest);
+      toast({
+        title: 'Request Submitted',
+        description: 'Your blood request has been broadcasted to nearby donors.',
+      });
+      form.reset();
+    } catch (error: any) {
+       toast({
+        variant: 'destructive',
+        title: 'Submission Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    } finally {
+        setIsLoading(false);
+    }
   }
 
   return (
@@ -196,7 +231,10 @@ export default function RequestBloodPage() {
                     </FormItem>
                   )}
                 />
-              <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90">Submit Request</Button>
+              <Button type="submit" disabled={isLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Submit Request
+              </Button>
             </form>
           </Form>
         </CardContent>

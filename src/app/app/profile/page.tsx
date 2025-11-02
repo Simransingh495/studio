@@ -14,9 +14,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
-import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useAuth, useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -34,6 +34,18 @@ export default function ProfilePage() {
   
   const { data: currentUser, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
+  const donationsQuery = useMemoFirebase(
+    () => user ? query(collection(firestore, 'donations'), where('donorId', '==', user.uid)) : null,
+    [firestore, user]
+  );
+  const { data: donations } = useCollection(donationsQuery);
+
+  const requestsQuery = useMemoFirebase(
+    () => user ? query(collection(firestore, 'bloodRequests'), where('userId', '==', user.uid)) : null,
+    [firestore, user]
+  );
+  const { data: requests } = useCollection(requestsQuery);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -48,6 +60,7 @@ export default function ProfilePage() {
     if (!currentUser || !userDocRef) return;
     const newAvailability = checked ? 'Available' : 'Unavailable';
     try {
+      // Not using non-blocking here to await result and give toast feedback
       await updateDoc(userDocRef, { availability: newAvailability });
       toast({ title: `Availability updated to ${newAvailability}` });
     } catch (error: any) {
@@ -92,8 +105,8 @@ export default function ProfilePage() {
 
   const stats = [
     { label: 'Blood Type', value: currentUser.bloodType },
-    { label: 'Donated', value: '0' },
-    { label: 'Requested', value: '0' },
+    { label: 'Donated', value: donations?.length ?? 0 },
+    { label: 'Requested', value: requests?.length ?? 0 },
   ];
 
   const menuItems = [

@@ -1,0 +1,105 @@
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { BloodRequest } from '@/lib/types';
+import { HeartHandshake, LifeBuoy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+export default function DonatePage() {
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  
+  const requestsCollection = useMemoFirebase(
+    () => collection(firestore, 'bloodRequests'),
+    [firestore]
+  );
+  const activeRequestsQuery = useMemoFirebase(
+    () => query(requestsCollection, where('status', '==', 'Pending'), orderBy('createdAt', 'desc')),
+    [requestsCollection]
+  );
+  const { data: activeRequests, isLoading } = useCollection<BloodRequest>(activeRequestsQuery);
+
+  const handleAccept = (request: BloodRequest) => {
+    // In a real app, this would trigger a match and notification flow.
+    toast({
+        title: "Offer Sent!",
+        description: `Your offer to donate for ${request.patientName} has been sent.`
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+       <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight font-headline">Become a Donor</h2>
+            <p className="text-muted-foreground">Find active blood requests and save a life today. Your donation is a gift of hope.</p>
+        </div>
+
+      <div className="space-y-4">
+        <h3 className="font-headline text-xl font-semibold">Active Requests</h3>
+        {isLoading && (
+           <div className="space-y-4">
+             <Skeleton className="h-28 w-full" />
+             <Skeleton className="h-28 w-full" />
+             <Skeleton className="h-28 w-full" />
+           </div>
+        )}
+        {!isLoading && activeRequests && activeRequests.length > 0 ? (
+          activeRequests.map((request) => (
+            <Card key={request.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold text-2xl text-primary">
+                      {request.bloodType.slice(0, -1)}
+                    </span>
+                    <span className="text-sm text-primary">
+                      {request.bloodType.slice(-1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold flex items-center gap-2">
+                    {request.patientName} 
+                    <Badge variant={request.urgency === 'High' ? 'destructive' : 'secondary'}>{request.urgency} Urgency</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {request.location}
+                  </p>
+                   <p className="text-xs text-muted-foreground mt-1">
+                    Posted on: {request.createdAt.toDate().toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button size="sm" onClick={() => handleAccept(request)}>
+                    <HeartHandshake className="mr-2 h-4 w-4"/>
+                    Donate
+                  </Button>
+                  <Button variant="secondary" size="sm">Details</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+           !isLoading && <div className="text-center py-10 bg-card rounded-lg border">
+                <LifeBuoy className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 text-lg font-semibold">No Active Requests</p>
+                <p className="text-muted-foreground mt-2">
+                  There are no pending blood requests right now. Thank you for your willingness to help!
+                </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
