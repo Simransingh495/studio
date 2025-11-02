@@ -143,7 +143,7 @@ export default function MyRequestsPage() {
                         <AccordionItem value={request.id} key={request.id} className="border-b-0">
                            <Card className="overflow-hidden">
                               <AccordionTrigger className="p-4 hover:no-underline data-[state=open]:bg-primary/5">
-                                <div className="flex items-center gap-4 text-left">
+                                <div className="flex items-center gap-4 text-left w-full">
                                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                                       <span className="font-bold text-xl text-primary">{request.bloodType}</span>
                                   </div>
