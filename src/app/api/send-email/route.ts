@@ -9,15 +9,15 @@ const sendEmailSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+
+  if (!resendApiKey || !fromEmail) {
+    console.error('API Route Error: RESEND_API_KEY or RESEND_FROM_EMAIL is not configured in .env file.');
+    return NextResponse.json({ error: 'Server is not configured for sending emails. Please check environment variables.' }, { status: 500 });
+  }
+  
   try {
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL;
-
-    if (!resendApiKey || !fromEmail) {
-      console.error('API Route Error: RESEND_API_KEY or RESEND_FROM_EMAIL is not configured in .env file.');
-      return NextResponse.json({ error: 'Server is not configured for sending emails.' }, { status: 500 });
-    }
-
     const resend = new Resend(resendApiKey);
 
     const body = await request.json();
