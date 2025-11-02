@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 const menuItems = [
@@ -47,7 +47,7 @@ const menuItems = [
   },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -135,4 +135,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </footer>
     </div>
   );
+}
+
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <FirebaseClientProvider>
+            <AppLayoutContent>{children}</AppLayoutContent>
+        </FirebaseClientProvider>
+    )
 }
