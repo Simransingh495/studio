@@ -4,12 +4,13 @@ export function Logo({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 text-lg font-bold tracking-tight text-primary',
+        'flex flex-col items-center font-bold tracking-tight text-primary',
         className
       )}
     >
+      <span className="font-headline text-2xl">BloodSync</span>
       <svg
-        className="h-8 w-8"
+        className="h-10 w-10"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +21,6 @@ export function Logo({ className }: { className?: string }) {
         />
         <path d="M13 10h-2v2H9v2h2v2h2v-2h2v-2h-2v-2z" fill="#fff" />
       </svg>
-      <span className="font-headline">BloodSync</span>
     </div>
   );
 }
