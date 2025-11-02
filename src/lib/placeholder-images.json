@@ -13,18 +13,6 @@
       "imageHint": "community event"
     },
     {
-      "id": "mission-image",
-      "description": "Doctor holding a blood bag",
-      "imageUrl": "https://images.unsplash.com/photo-1627830917231-3f6764b7367f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxibG9vZCUyMGRvbmF0aW9ufGVufDB8fHx8MTc2NDA0MjYwMHww&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "blood donation"
-    },
-    {
-      "id": "quote-image",
-      "description": "Close-up of a heart shaped sticker on a person's arm after donating blood.",
-      "imageUrl": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxibG9vZCUyMGRvbmF0aW9uJTIwY2FtcHxlbnwwfHx8fDE3NjMyOTY1OTB8MA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "blood donation camp"
-    },
-    {
       "id": "avatar-1",
       "description": "User avatar 1",
       "imageUrl": "https://images.unsplash.com/photo-1592621385612-4d7129426394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MjAzMDE4OXww&ixlib=rb-4.1.0&q=80&w=1080",

@@ -22,10 +22,6 @@ export default function Home() {
   const communityImage = PlaceHolderImages.find(
     (img) => img.id === 'community-image'
   );
-  const missionImage = PlaceHolderImages.find(
-    (img) => img.id === 'mission-image'
-  );
-  const quoteImage = PlaceHolderImages.find((img) => img.id === 'quote-image');
 
   const stats = [
     {
@@ -157,29 +153,16 @@ export default function Home() {
         {/* Our Mission Section */}
         <section id="mission" className="bg-background py-16 sm:py-24">
           <div className="container mx-auto px-4">
-            <div className="grid items-center gap-12 md:grid-cols-2">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-                  Our Mission
-                </h2>
-                <p className="text-xl text-muted-foreground">
-                  To create a world where no one suffers due to a shortage of blood. We aim to bridge the gap between donors and recipients through a smart, reliable, and life-saving network.
-                </p>
-                 <p className="text-muted-foreground">
-                  BloodSync leverages technology to build a responsive community, ensuring that safe blood is available to anyone in need, anytime, anywhere. We're dedicated to making the process of donation and reception as seamless as possible.
-                </p>
-              </div>
-              {missionImage && (
-                <div className="relative h-80 w-full overflow-hidden rounded-lg shadow-lg">
-                  <Image
-                    src={missionImage.imageUrl}
-                    alt={missionImage.description}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={missionImage.imageHint}
-                  />
-                </div>
-              )}
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+                Our Mission
+              </h2>
+              <p className="mt-4 text-xl text-muted-foreground">
+                To create a world where no one suffers due to a shortage of blood. We aim to bridge the gap between donors and recipients through a smart, reliable, and life-saving network.
+              </p>
+               <p className="mt-4 text-muted-foreground">
+                BloodSync leverages technology to build a responsive community, ensuring that safe blood is available to anyone in need, anytime, anywhere. We're dedicated to making the process of donation and reception as seamless as possible.
+              </p>
             </div>
           </div>
         </section>
@@ -214,17 +197,8 @@ export default function Home() {
         </section>
 
         {/* Quote Section */}
-        <section className="relative bg-primary/5 py-16 sm:py-24">
-          {quoteImage && (
-             <Image
-              src={quoteImage.imageUrl}
-              alt={quoteImage.description}
-              fill
-              className="object-cover object-center opacity-10"
-              data-ai-hint={quoteImage.imageHint}
-            />
-          )}
-          <div className="relative container mx-auto px-4">
+        <section className="bg-primary/5 py-16 sm:py-24">
+          <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
               <Quote className="mx-auto h-12 w-12 text-primary" />
               <blockquote className="mt-4">
