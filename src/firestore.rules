@@ -132,10 +132,9 @@ service cloud.firestore {
       allow create: if request.auth != null;
 
       // Allow a user to read their own donation records.
-      // This supports querying for a user's donation history.
       allow get: if request.auth.uid == resource.data.donorId;
 
-      // Allow authenticated users to list donations (e.g. for admin panels)
+      // Allow authenticated users to list donations. Client queries MUST filter by donorId.
       allow list: if request.auth != null;
 
       // Prevent updates and deletions to maintain data integrity.
@@ -156,11 +155,11 @@ service cloud.firestore {
       // Allow creation if the user is authenticated and is not sending a notification to themselves.
       allow create: if request.auth != null && request.auth.uid != request.resource.data.userId;
 
-      // Allow get if the notification's userId matches the requester's UID.
+      // Allow a user to get their own notification.
       allow get: if request.auth != null && request.auth.uid == resource.data.userId;
       
-      // Allow list operations for any authenticated user.
-      // Security is enforced by the client-side queries which MUST filter by userId.
+      // Allow a user to list their own notifications.
+      // The client query MUST enforce this by filtering where `userId` == `request.auth.uid`.
       allow list: if request.auth != null;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
