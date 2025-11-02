@@ -64,7 +64,7 @@ export function MainHeader() {
            <Button asChild variant="ghost">
             <Link href="/login">Login</Link>
           </Button>
-          <Button asChild className="rounded-full">
+          <Button asChild>
             <Link href="/register">Register</Link>
           </Button>
         </div>
