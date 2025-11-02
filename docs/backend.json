@@ -1,0 +1,262 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the BloodSync system, either a donor or a patient.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "bloodType": {
+          "type": "string",
+          "description": "Blood type of the user (e.g., A+, O-)."
+        },
+        "isDonor": {
+          "type": "boolean",
+          "description": "Indicates whether the user is a blood donor."
+        },
+        "location": {
+          "type": "string",
+          "description": "Geolocation coordinates of the user (e.g., latitude, longitude)."
+        },
+        "lastDonationDate": {
+          "type": "string",
+          "description": "The date of the users last donation.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "bloodType",
+        "isDonor",
+        "location"
+      ]
+    },
+    "BloodRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BloodRequest",
+      "type": "object",
+      "description": "Represents a blood request made by a patient.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the blood request entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who made the request. (Relationship: User 1:N BloodRequest)"
+        },
+        "bloodType": {
+          "type": "string",
+          "description": "Blood type required for the request."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of blood required (e.g., in units or ml)."
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority of the request (e.g., urgent, normal)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the request (e.g., pending, matched, completed)."
+        },
+        "requestDate": {
+          "type": "string",
+          "description": "Date when the blood request was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "bloodType",
+        "quantity",
+        "priority",
+        "status",
+        "requestDate"
+      ]
+    },
+    "DonationMatch": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DonationMatch",
+      "type": "object",
+      "description": "Represents a match between a blood request and a potential donor.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the donation match entity."
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Reference to BloodRequest. (Relationship: BloodRequest 1:N DonationMatch)"
+        },
+        "donorId": {
+          "type": "string",
+          "description": "Reference to User (donor) in the match. (Relationship: User 1:N DonationMatch)"
+        },
+        "matchDate": {
+          "type": "string",
+          "description": "Date when the match was made.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the match (e.g., pending, accepted, rejected, completed)."
+        }
+      },
+      "required": [
+        "id",
+        "requestId",
+        "donorId",
+        "matchDate",
+        "status"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification sent to a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the notification entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who receives the notification. (Relationship: User 1:N Notification)"
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the notification message."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of notification (e.g., email, sms, in-app)."
+        },
+        "sentDate": {
+          "type": "string",
+          "description": "Date when the notification was sent.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the notification (e.g., sent, delivered, read)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "message",
+        "type",
+        "sentDate",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user data, including personal information and preferences. Path-based ownership ensures only the user can access their own document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/bloodRequests/{bloodRequestId}",
+        "definition": {
+          "entityName": "BloodRequest",
+          "schema": {
+            "$ref": "#/backend/entities/BloodRequest"
+          },
+          "description": "Stores blood request information. Includes denormalized 'userId' to link request to the user.",
+          "params": [
+            {
+              "name": "bloodRequestId",
+              "description": "The unique identifier of the blood request."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/donationMatches/{donationMatchId}",
+        "definition": {
+          "entityName": "DonationMatch",
+          "schema": {
+            "$ref": "#/backend/entities/DonationMatch"
+          },
+          "description": "Stores information about matches between blood requests and donors. Includes references to both 'requestId' and 'donorId'.",
+          "params": [
+            {
+              "name": "donationMatchId",
+              "description": "The unique identifier of the donation match."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Stores notifications for each user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user receiving the notification."
+            },
+            {
+              "name": "notificationId",
+              "description": "The unique identifier of the notification."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and ease of debugging, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs. \n\n1.  **Authorization Independence:** Achieved by denormalizing relevant user data (specifically, `isDonor`, `bloodType`, and `location`) into the `BloodRequest` collection. This eliminates the need for `get()` calls to the `/users/{userId}` document to determine authorization, allowing for atomic operations and simplified security rules. Notifications related to the blood request are also pushed into the `users/{userId}/notifications` subcollection. The DonationMatch documents store both `requestId` and `donorId`. \n\n2.  **Structural Segregation:** Each top-level collection (`users`, `bloodRequests`, `donationMatches`) serves a distinct purpose and has homogeneous security requirements.\n\n3.  **Access Modeling:**\n    *   User data is stored under `/users/{userId}`, providing path-based ownership for private user data.\n    *   Blood requests are stored in a top-level `/bloodRequests` collection.  Authorization depends on the `userId` field within each document and denormalized donor information (blood type, location, isDonor) to enable filtering based on donor attributes without requiring additional reads.\n    *   Donation matches are stored in a top-level `/donationMatches` collection, referencing both the `BloodRequest` and the `User` (donor). The denormalized `userId` and `requestId` ensure authorization rules can be written without needing to fetch related documents.\n    *   Notifications are stored under `/users/{userId}/notifications`. This creates a direct hierarchy for managing notifications related to specific users and simplifies ownership-based security.\n\n4.  **QAPs (Rules are not Filters):** The structure facilitates secure `list` operations by:\n    *   Storing blood requests in a top-level collection (`/bloodRequests`). This allows listing blood requests that meet certain criteria (e.g., blood type, priority) without exposing unauthorized data.\n    *   Segregating user data and blood request data, preventing the need to filter based on user attributes in the blood request collection (and vice versa). The denormalized donor information in blood requests further helps in securing list operations.\n\n5. **Notifications**: Notifications are stored as a subcollection of users, to allow a user to get all notifications for them without exposing the data of another user. A service will listen to changes in the bloodRequests collection to create new notifications"
+  }
+}
