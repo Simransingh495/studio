@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
-import { useUser, useFirestore, useDoc, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase, FirebaseClientProvider, useCollection } from '@/firebase';
+import { collection, doc, query, where } from 'firebase/firestore';
 
 const menuItems = [
   {
@@ -59,6 +59,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   
   const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
 
+  const notificationsQuery = useMemoFirebase(
+    () => user ? query(collection(firestore, 'users', user.uid, 'notifications'), where('isRead', '==', false)) : null,
+    [firestore, user]
+  );
+  const { data: unreadNotifications } = useCollection(notificationsQuery);
+  const unreadCount = unreadNotifications?.length ?? 0;
+
   const isLoading = isUserLoading || isUserDataLoading;
   const userName = userData ? userData.firstName : 'User';
 
@@ -74,9 +81,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <h1 className="font-headline text-xl font-semibold">Hello {userName}!</h1>
         )}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <Bell className="h-6 w-6" />
-            <span className="sr-only">Notifications</span>
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/app/notifications">
+              <Bell className="h-6 w-6" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              )}
+              <span className="sr-only">Notifications</span>
+            </Link>
           </Button>
           <UserNav />
         </div>

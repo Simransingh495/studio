@@ -7,8 +7,8 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, where, getDocs, startAt, endAt } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, useUser, addDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, where, getDocs, startAt, endAt, serverTimestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { BloodRequest } from '@/lib/types';
 import { HeartHandshake, LifeBuoy, Loader2, MapPin } from 'lucide-react';
@@ -19,6 +19,7 @@ type RequestWithDistance = BloodRequest & { distance?: number };
 
 export default function DonatePage() {
   const firestore = useFirestore();
+  const { user: currentUser, isUserLoading } = useUser();
   const { toast } = useToast();
   const [location, setLocation] = useState<{
     latitude: number;
@@ -27,6 +28,7 @@ export default function DonatePage() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [activeRequests, setActiveRequests] = useState<RequestWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [donating, setDonating] = useState<string | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -41,13 +43,11 @@ export default function DonatePage() {
         (err) => {
           setLocationError(`Error: ${err.message}`);
           toast({ variant: 'destructive', title: "Location Error", description: "Could not get location. Showing all requests." });
-          // If location fails, fetch all requests without filtering
           fetchRequests();
         }
       );
     } else {
       setLocationError('Geolocation is not supported by this browser.');
-      // If location is not supported, fetch all requests without filtering
       fetchRequests();
     }
   }, [toast]);
@@ -82,6 +82,8 @@ export default function DonatePage() {
         snapshots.forEach((snap) => {
             snap.forEach((doc) => {
                 const data = doc.data() as BloodRequest;
+                if(data.userId === currentUser?.uid) return; // Don't show user's own requests
+                
                 if (center && data.lat && data.lng) {
                     const distanceInKm = geofire.distanceBetween([data.lat, data.lng], center);
                     const distanceInM = distanceInKm * 1000;
@@ -89,17 +91,14 @@ export default function DonatePage() {
                         matchingDocs.push({ ...data, id: doc.id, distance: distanceInKm });
                     }
                 } else if (!center) {
-                    // if no center, add all docs
                      matchingDocs.push({ ...data, id: doc.id });
                 }
             });
         });
         
-        // Sort by distance if available
         if (center) {
             matchingDocs.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
         } else {
-            // fallback sort by date
             matchingDocs.sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis());
         }
 
@@ -118,24 +117,65 @@ export default function DonatePage() {
   };
   
   useEffect(() => {
-    if(!firestore) return;
+    if(!firestore || isUserLoading) return;
     if (location) {
         fetchRequests([location.latitude, location.longitude]);
-    } else if (locationError) { // This will run if geolocation fails or is not supported
+    } else if (locationError) { 
         fetchRequests();
     }
-  }, [location, firestore, locationError]);
+  }, [location, firestore, locationError, isUserLoading]);
 
 
-  const handleAccept = (request: BloodRequest) => {
-    // In a real app, this would trigger a match and notification flow.
-    toast({
-        title: "Offer Sent!",
-        description: `Your offer to donate for ${request.patientName} has been sent.`
-    })
+  const handleOfferDonation = (request: BloodRequest) => {
+    if (!currentUser || !firestore) return;
+    
+    setDonating(request.id);
+
+    // 1. Create a DonationMatch document
+    const matchCollection = collection(firestore, 'donationMatches');
+    const newMatch = {
+        requestId: request.id,
+        requestUserId: request.userId,
+        donorId: currentUser.uid,
+        donorName: `${currentUser.displayName || 'Anonymous Donor'}`,
+        donorBloodType: 'Unknown', // In a real app, get this from donor's profile
+        donorLocation: 'Unknown', // and this
+        matchDate: serverTimestamp(),
+        status: 'pending',
+    };
+    
+    // 2. Create a notification for the patient
+    const patientNotifCollection = collection(firestore, 'users', request.userId, 'notifications');
+    const newNotification = {
+        userId: request.userId,
+        message: `A donor has offered to fulfill your request for ${request.bloodType} blood.`,
+        type: 'request_match',
+        relatedId: request.id,
+        isRead: false,
+        createdAt: serverTimestamp(),
+    };
+
+    try {
+        addDocumentNonBlocking(matchCollection, newMatch);
+        addDocumentNonBlocking(patientNotifCollection, newNotification);
+
+        toast({
+            title: "Offer Sent!",
+            description: `The patient has been notified of your offer.`
+        });
+    } catch(err) {
+        console.error("Error offering donation: ", err);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not send your donation offer."
+        })
+    } finally {
+        setDonating(null);
+    }
   }
 
-  const showLoading = isLoading || (!location && !locationError);
+  const showLoading = isLoading || isUserLoading || (!location && !locationError);
 
   return (
     <div className="space-y-6">
@@ -195,11 +235,10 @@ export default function DonatePage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Button size="sm" onClick={() => handleAccept(request)}>
-                    <HeartHandshake className="mr-2 h-4 w-4"/>
+                  <Button size="sm" onClick={() => handleOfferDonation(request)} disabled={donating === request.id}>
+                    {donating === request.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <HeartHandshake className="mr-2 h-4 w-4"/>}
                     Donate
                   </Button>
-                  <Button variant="secondary" size="sm">Details</Button>
                 </div>
               </CardContent>
             </Card>
