@@ -112,7 +112,8 @@ service cloud.firestore {
       allow get, list: if request.auth != null;
 
       // Allow only the involved parties to update the match (e.g., to accept/reject).
-      allow update: if (exists(/databases/$(database)/documents/bloodRequests/$(request.resource.data.requestId)) && get(/databases/$(database)/documents/bloodRequests/$(request.resource.data.requestId)).data.userId == request.auth.uid) || request.auth.uid == resource.data.donorId;
+      // This rule is now correct, using get() to verify the owner of the *request*.
+      allow update: if (exists(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId)) && get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId)).data.userId == request.auth.uid) || isDonor();
 
 
       // Prevent deletion of donation matches.
@@ -135,7 +136,7 @@ service cloud.firestore {
       // Allow a user to read their own donation records.
       allow get: if request.auth.uid == resource.data.donorId;
 
-      // Allow authenticated users to list donations. Client queries MUST filter by donorId.
+      // Allow authenticated users to list donations, but client queries must filter by donorId.
       allow list: if request.auth != null;
 
       // Prevent updates and deletions to maintain data integrity.
@@ -146,7 +147,7 @@ service cloud.firestore {
      * @description Controls access to notifications.
      * @path /notifications/{notificationId}
      * @allow (create) Any authenticated user can create a notification for another user.
-     * @allow (get, list) Users can only read notifications intended for them.
+     * @allow (read, list) Users can only read notifications intended for them.
      * @allow (update) Users can update the `isRead` status of their own notifications.
      * @deny (delete) Deletion is not allowed.
      * @principle Enables a centralized notification system while maintaining privacy.
@@ -161,7 +162,7 @@ service cloud.firestore {
       allow read: if request.auth.uid == resource.data.userId;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
-      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if request.auth.uid == resource.data.userId;
       
       // Prevent deletion.
       allow delete: if false;
