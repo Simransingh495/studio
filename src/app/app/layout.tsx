@@ -11,9 +11,12 @@ import {
   User,
   Droplets,
   Bell,
+  Loader2,
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/ui/button';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 const menuItems = [
   {
@@ -40,11 +43,27 @@ const menuItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid) : null),
+    [firestore, user]
+  );
+  
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
+
+  const isLoading = isUserLoading || isUserDataLoading;
+  const userName = userData ? userData.firstName : 'User';
 
   return (
     <div className="flex min-h-screen flex-col bg-secondary">
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
-        <h1 className="font-headline text-xl font-semibold">Hello Jhon!</h1>
+        {isLoading ? (
+           <Loader2 className="h-6 w-6 animate-spin" />
+        ) : (
+          <h1 className="font-headline text-xl font-semibold">Hello {userName}!</h1>
+        )}
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon">
             <Bell className="h-6 w-6" />
