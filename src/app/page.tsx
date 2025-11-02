@@ -295,28 +295,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col items-center gap-2 sm:items-end">
-            <nav className="flex gap-4">
-                <Link
-                href="#about"
-                className="text-sm text-muted-foreground hover:text-primary"
-                >
-                About
-                </Link>
-                <Link
-                href="#features"
-                className="text-sm text-muted-foreground hover:text-primary"
-                >
-                Features
-                </Link>
-                <Link
-                href="/login"
-                className="text-sm text-muted-foreground hover:text-primary"
-                >
-                Login
-                </Link>
-            </nav>
+            <div className="flex flex-col items-center gap-2 sm:items-end">
+                <p className="text-sm font-semibold text-muted-foreground">Contact Us</p>
+                <div className="flex gap-4">
+                    <a href="#" className="text-sm text-muted-foreground hover:text-primary">LinkedIn</a>
+                    <a href="#" className="text-sm text-muted-foreground hover:text-primary">Twitter</a>
+                </div>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Developed by <a href="#" className="font-semibold text-primary hover:underline">Your Name Here</a>. © {new Date().getFullYear()} All rights reserved.
+              © {new Date().getFullYear()} BloodSync. All rights reserved.
             </p>
           </div>
         </div>
