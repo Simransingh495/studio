@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "hero-image",
-      "description": "A compassionate scene of a blood donation camp.",
-      "imageUrl": "https://images.unsplash.com/photo-1576086213369-97a306d36557?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxibG9vZCUyMGRvbmF0aW9ufGVufDB8fHx8MTc2NDA0MjYwMHww&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "blood donation"
+      "description": "A compassionate doctor holding a patient's hand.",
+      "imageUrl": "https://images.unsplash.com/photo-1622288092528-a5392a83a002?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3IlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzYzNzM3NDgyfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "doctor handshake"
     },
     {
       "id": "community-image",
