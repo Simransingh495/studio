@@ -65,7 +65,7 @@ export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
-  const [isLocationLoading, setIsLocationLoading] = useState(true); // Start true
+  const [isLocationLoading, setIsLocationLoading] = useState(false); // Fix: Start false
   const [userCoords, setUserCoords] = useState<{ lat: number, lng: number} | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,6 +83,7 @@ export default function RegisterPage() {
   
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.geolocation) {
+      setIsLocationLoading(true); // Set loading to true only on the client
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
