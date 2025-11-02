@@ -1,144 +1,91 @@
 'use client';
 
+import Image from 'next/image';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { donations, bloodRequests, users } from '@/lib/data';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import { Droplets, HeartHandshake, Users, LifeBuoy } from 'lucide-react';
-import { bloodTypes } from '@/lib/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { bloodRequests } from '@/lib/data';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-
-const bloodTypeCounts = bloodTypes.map((type) => ({
-  name: type,
-  total: users.filter(
-    (user) => user.bloodType === type && user.role === 'donor'
-  ).length,
-}));
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function OverviewPage() {
-  const stats = [
-    {
-      title: 'Total Donors',
-      value: users.filter((u) => u.role === 'donor').length,
-      icon: Users,
-    },
-    {
-      title: 'Blood Requests',
-      value: bloodRequests.length,
-      icon: HeartHandshake,
-    },
-    {
-      title: 'Lives Saved',
-      value: donations.length,
-      icon: LifeBuoy,
-    },
-    {
-      title: 'Your Donations',
-      value: 3, // Mock value
-      icon: Droplets,
-    },
-  ];
-
-  const recentRequests = bloodRequests.slice(0, 5);
+  const recentRequests = bloodRequests.slice(0, 2);
+  const donateBanner = PlaceHolderImages.find(
+    (img) => img.id === 'avatar-4'
+  );
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight font-headline">Overview</h2>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle className="font-headline">Donor Blood Types</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={bloodTypeCounts}>
-                <XAxis
-                  dataKey="name"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}`}
-                />
-                <Bar
-                  dataKey="total"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="font-headline">Recent Blood Requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Blood Type</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Urgency</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">
-                      {request.bloodType}
-                    </TableCell>
-                    <TableCell>{request.location}</TableCell>
-                    <TableCell>
-                       <Badge
-                        variant={
-                          request.urgency === 'High' ? 'destructive' : 
-                          request.urgency === 'Medium' ? 'secondary' : 'outline'
-                        }
-                      >
-                        {request.urgency}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="overflow-hidden bg-primary text-primary-foreground">
+        <div className="flex items-center">
+          <div className="flex-1 p-6">
+            <h2 className="text-2xl font-bold">Donate Blood,</h2>
+            <h2 className="text-2xl font-bold">Save Lives</h2>
+            <p className="mt-2 text-sm">
+              Your donation can save up to 3 lives. Be a hero today.
+            </p>
+          </div>
+          <div className="relative h-32 w-32 flex-shrink-0">
+            {donateBanner && (
+              <Image
+                src={donateBanner.imageUrl}
+                alt="Donate Blood"
+                fill
+                className="object-cover"
+                data-ai-hint="woman smiling"
+              />
+            )}
+          </div>
+        </div>
+      </Card>
+
+      <Tabs defaultValue="blood">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="blood">Blood</TabsTrigger>
+          <TabsTrigger value="plasma">Plasma</TabsTrigger>
+        </TabsList>
+        <TabsContent value="blood" className="mt-4 space-y-4">
+          {recentRequests.map((request) => (
+            <Card key={request.id}>
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold text-2xl text-primary">
+                      {request.bloodType.slice(0, -1)}
+                    </span>
+                    <span className="text-sm text-primary">
+                      {request.bloodType.slice(-1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    {request.urgency} Urgency
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {request.location}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm">Share</Button>
+                  <Button size="sm">Accept</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        <TabsContent value="plasma">
+          <p className="p-4 text-center text-muted-foreground">
+            Plasma requests will be shown here.
+          </p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

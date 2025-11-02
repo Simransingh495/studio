@@ -61,10 +61,10 @@ export function MainHeader() {
         </Sheet>
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <Button asChild variant="ghost">
+           <Button asChild variant="ghost">
             <Link href="/login">Login</Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="rounded-full">
             <Link href="/register">Register</Link>
           </Button>
         </div>

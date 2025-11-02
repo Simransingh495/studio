@@ -1,202 +1,134 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { bloodTypes, User } from '@/lib/types';
+import { User } from '@/lib/types';
 import { users } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const profileSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.',
-  }),
-  email: z.string().email(),
-  location: z.string().min(2, "Location is required"),
-  bloodType: z.string().min(1, "Blood type is required"),
-  availability: z.boolean(),
-  healthConditions: z.string().optional(),
-});
+import {
+  List,
+  LogOut,
+  Settings,
+  Switch,
+  Timer,
+  User as UserIcon,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { toast } = useToast();
   // Mocking logged-in user data
   const currentUser = users[0] as User;
 
-  const form = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: currentUser.name,
-      email: currentUser.email,
-      location: currentUser.location,
-      bloodType: currentUser.bloodType,
-      availability: currentUser.availability === 'Available',
-      healthConditions: currentUser.healthConditions,
-    },
-  });
+  const userInitials = currentUser.name.split(' ').map((n) => n[0]).join('');
 
-  function onSubmit(values: z.infer<typeof profileSchema>) {
-    console.log(values);
-    toast({
-      title: 'Profile Updated',
-      description: 'Your information has been saved successfully.',
-    });
-  }
-  
-  const userInitials = currentUser.name.split(' ').map(n => n[0]).join('');
+  const stats = [
+    { label: 'Blood Type', value: currentUser.bloodType },
+    { label: 'Donated', value: '04' },
+    { label: 'Requested', value: '03' },
+  ];
+
+  const menuItems = [
+    { label: 'Edit Profile', icon: UserIcon, href: '#' },
+    { label: 'Donation History', icon: List, href: '#' },
+    { label: 'Set Timer', icon: Timer, href: '#' },
+    { label: 'Settings', icon: Settings, href: '#' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight font-headline">My Profile</h2>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-              <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl">{currentUser.name}</CardTitle>
-              <CardDescription>
-                Update your personal and donation-related information here.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="your@email.com" {...field} readOnly />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="City, State" {...field} />
-                      </FormControl>
-                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bloodType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Blood Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select blood type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {bloodTypes.map(type => (
-                            <SelectItem key={type} value={type}>{type}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="healthConditions"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Health Conditions</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="List any relevant health conditions or medications. Write 'None' if not applicable." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="availability"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 md:col-span-2">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Available for Donation
-                        </FormLabel>
-                        <p className="text-sm text-muted-foreground">
-                          Enable this if you are currently able to donate blood.
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+    <div className="flex h-full flex-col">
+      <div className="bg-primary pb-24 pt-6 text-primary-foreground">
+        <div className="container mx-auto max-w-md px-4 text-center">
+          <h2 className="text-xl font-semibold">Profile</h2>
+        </div>
+      </div>
+      <div className="-mt-20 flex-1 bg-secondary">
+        <div className="container mx-auto max-w-md p-4">
+          <Card className="transform -translate-y-12 rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="h-24 w-24 border-4 border-primary/50">
+                  <AvatarImage
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                  />
+                  <AvatarFallback className="text-3xl">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <h3 className="mt-4 text-xl font-bold">{currentUser.name}</h3>
+                <div className="mt-4 flex w-full gap-2">
+                  <Button className="flex-1 rounded-full">Call Now</Button>
+                  <Button variant="secondary" className="flex-1 rounded-full">
+                    Request
+                  </Button>
+                </div>
               </div>
-              <Button type="submit">Update Profile</Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <div className="transform -translate-y-6">
+            <Card className="rounded-2xl">
+              <CardContent className="flex justify-around p-4 text-center">
+                {stats.map((stat) => (
+                  <div key={stat.label}>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="mt-4 rounded-2xl">
+              <CardContent className="p-4">
+                <ul className="space-y-2">
+                  <li className="flex items-center justify-between rounded-lg p-2 hover:bg-secondary">
+                    <div className="flex items-center gap-4">
+                      <span className="font-semibold">
+                        Available for Donate
+                      </span>
+                    </div>
+                    <Switch
+                      checked={currentUser.availability === 'Available'}
+                      onCheckedChange={() =>
+                        toast({ title: 'Availability updated!' })
+                      }
+                    />
+                  </li>
+                  {menuItems.map((item) => (
+                    <li key={item.label}>
+                      <Link
+                        href={item.href}
+                        className="flex items-center gap-4 rounded-lg p-3 hover:bg-secondary"
+                      >
+                        <item.icon className="h-5 w-5 text-muted-foreground" />
+                        <span className="flex-1 font-medium">
+                          {item.label}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link
+                      href="/"
+                      className="flex items-center gap-4 rounded-lg p-3 text-destructive hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span className="flex-1 font-medium">Log out</span>
+                    </Link>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
