@@ -71,9 +71,8 @@ export default function RequestBloodPage() {
   });
 
   useEffect(() => {
-    // This effect runs only on the client
-    if (navigator.geolocation) {
-      setIsLocationLoading(true); // Set loading to true when we start fetching
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      setIsLocationLoading(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
