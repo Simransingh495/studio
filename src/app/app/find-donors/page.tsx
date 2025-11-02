@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Loader2 } from 'lucide-react';
+import * as geofire from 'geofire-common';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,9 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, where, orderBy, endAt, startAt, getDocs, Query } from 'firebase/firestore';
 
 export default function FindDonorsPage() {
   const [location, setLocation] = useState<{
@@ -26,10 +26,13 @@ export default function FindDonorsPage() {
     longitude: number;
   } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [nearbyDonors, setNearbyDonors] = useState<User[]>([]);
+  const [isDonorsLoading, setIsDonorsLoading] = useState(true);
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { user } = useUser();
 
-  // Get location
+  // Get user's location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -42,28 +45,77 @@ export default function FindDonorsPage() {
         (err) => {
           setLocationError(`Error: ${err.message}`);
           toast({ variant: 'destructive', title: "Location Error", description: err.message });
+          setIsDonorsLoading(false);
         }
       );
     } else {
       setLocationError('Geolocation is not supported by this browser.');
+      setIsDonorsLoading(false);
     }
   }, [toast]);
-  
-  // In a real app, you would use a geospatial query.
-  // For this prototype, we'll just fetch all donors.
-  const donorsCollection = useMemoFirebase(
-    () => collection(firestore, 'users'),
-    [firestore]
-  );
-  const donorsQuery = useMemoFirebase(
-    () => query(donorsCollection, where('isDonor', '==', true)),
-    [donorsCollection]
-  );
 
-  const { data: nearbyDonors, isLoading: isDonorsLoading } = useCollection<User>(donorsQuery);
+  // Fetch nearby donors when location is available
+  useEffect(() => {
+    if (!location || !firestore || !user) {
+      return;
+    }
+
+    const fetchDonors = async () => {
+      setIsDonorsLoading(true);
+      const center: geofire.Geopoint = [location.latitude, location.longitude];
+      const radiusInM = 50 * 1000; // 50 km
+
+      const bounds = geofire.geohashQueryBounds(center, radiusInM);
+      const promises = [];
+
+      for (const b of bounds) {
+        const q = query(
+          collection(firestore, 'users'),
+          orderBy('geohash'),
+          startAt(b[0]),
+          endAt(b[1])
+        );
+        promises.push(getDocs(q));
+      }
+
+      try {
+        const snapshots = await Promise.all(promises);
+        const matchingDocs: User[] = [];
+        snapshots.forEach((snap) => {
+          snap.forEach((doc) => {
+            const data = doc.data() as User;
+            // Exclude the current user from the list
+            if (data.id === user.uid) {
+              return;
+            }
+
+            if (data.lat && data.lng) {
+              const distanceInKm = geofire.distanceBetween([data.lat, data.lng], center);
+              const distanceInM = distanceInKm * 1000;
+              if (distanceInM <= radiusInM) {
+                matchingDocs.push({ ...data, id: doc.id });
+              }
+            }
+          });
+        });
+        setNearbyDonors(matchingDocs);
+      } catch (err: any) {
+        console.error("Error fetching donors:", err);
+        toast({
+          variant: 'destructive',
+          title: 'Error finding donors',
+          description: err.message
+        });
+      } finally {
+        setIsDonorsLoading(false);
+      }
+    };
+
+    fetchDonors();
+
+  }, [location, firestore, toast, user]);
 
   const isLoading = isDonorsLoading || (!location && !locationError);
-
 
   const handleRequest = (donorName: string) => {
     toast({
@@ -88,7 +140,7 @@ export default function FindDonorsPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span>
-                Showing donors. (In a real app these would be filtered by your location: Lat: {location.latitude.toFixed(2)}, Lon: {location.longitude.toFixed(2)})
+                Showing donors within a 50km radius of your location. (Lat: {location.latitude.toFixed(2)}, Lon: {location.longitude.toFixed(2)})
               </span>
             </div>
            )}
@@ -155,8 +207,8 @@ export default function FindDonorsPage() {
 
       {!isLoading && (!nearbyDonors || nearbyDonors.length === 0) && (
          <div className="text-center py-10 bg-card rounded-lg border">
-            <p className="text-lg font-semibold">No Donors Found</p>
-            <p className="text-muted-foreground mt-2">No donors were found. Please try again later.</p>
+            <p className="text-lg font-semibold">No Donors Found Nearby</p>
+            <p className="text-muted-foreground mt-2">No donors were found within a 50km radius. Please try again later.</p>
          </div>
       )}
     </div>

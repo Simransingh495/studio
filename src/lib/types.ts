@@ -7,11 +7,15 @@ export type User = {
   email: string;
   role: 'donor' | 'patient' | 'admin';
   bloodType: string;
-  location: string;
+  // Location can be a simple string for display, but we also store structured geo data
+  location: string; 
+  geohash?: string;
+  lat?: number;
+  lng?: number;
   availability: 'Available' | 'Unavailable';
   lastDonationDate: string | null;
-  healthConditions: string;
-  avatarUrl: string;
+  healthConditions?: string;
+  avatarUrl?: string;
   isDonor: boolean;
 };
 

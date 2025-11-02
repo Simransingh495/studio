@@ -5,8 +5,9 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import * as geofire from 'geofire-common';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -52,6 +53,7 @@ const formSchema = z.object({
     message: 'Password must be at least 6 characters.',
   }),
   bloodType: z.string().min(1, { message: 'Please select a blood type' }),
+  location: z.string().min(2, { message: 'Location is required' }),
 });
 
 export default function RegisterPage() {
@@ -60,6 +62,28 @@ export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState<{ lat: number, lng: number} | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserCoords({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error("Could not get location:", err.message);
+          toast({
+            variant: 'destructive',
+            title: 'Location Error',
+            description: "Could not get your location. Please enter it manually.",
+          });
+        }
+      );
+    }
+  }, [toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,6 +93,7 @@ export default function RegisterPage() {
       email: '',
       password: '',
       bloodType: '',
+      location: '',
     },
   });
 
@@ -83,20 +108,25 @@ export default function RegisterPage() {
       const user = userCredential.user;
 
       const userDocRef = doc(firestore, 'users', user.uid);
-      const userData = {
+      const userData: any = {
         id: user.uid,
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         bloodType: values.bloodType,
+        location: values.location,
         isDonor: true, // Default to donor
-        location: '', // Will be updated later
         lastDonationDate: null,
         availability: 'Available',
         role: 'donor',
       };
+
+      if (userCoords) {
+        userData.lat = userCoords.lat;
+        userData.lng = userCoords.lng;
+        userData.geohash = geofire.geohashForLocation([userCoords.lat, userCoords.lng]);
+      }
       
-      // Use the non-blocking function to create the user document
       setDocumentNonBlocking(userDocRef, userData, { merge: false });
 
       toast({
@@ -181,6 +211,19 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
+             <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City, State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., San Francisco, CA" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <FormField
               control={form.control}
               name="bloodType"
