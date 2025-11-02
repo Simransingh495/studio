@@ -112,18 +112,16 @@ export default function MyRequestsPage() {
         };
         await addDoc(donationCollection, newDonation);
         
-        // TODO: This section does not send a real SMS. It simulates the action by logging to the console.
-        // To send a real SMS, you would need to replace the console.log
-        // with a call to a backend function or a third-party SMS service (e.g., Twilio).
-        console.log(`
-            --- SIMULATING ACCEPTANCE SMS ---
-            This is not a real SMS. It is a console log acting as a placeholder.
-            To: Donor's Phone (${match.donorPhoneNumber})
-            From: BloodSync System
-            Message: Your donation offer for ${requestDoc.bloodType} blood has been accepted! 
-            Please contact the patient at ${requestDoc.contactPhone} or ${requestDoc.contactEmail}.
-            --- END SIMULATION ---
-          `);
+        // Send SMS notification
+        const message = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone} or ${requestDoc.contactEmail}.`;
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: match.donorPhoneNumber,
+            message: message,
+          }),
+        });
 
         toast({
           title: 'Match Accepted!',
@@ -149,17 +147,17 @@ export default function MyRequestsPage() {
           }
         }
       } else if (response === 'rejected') {
-        // TODO: This section does not send a real SMS. It simulates sending a rejection notification.
-        console.log(`
-            --- SIMULATING REJECTION SMS ---
-            This is not a real SMS. It is a console log acting as a placeholder.
-            To: Donor's Phone (${match.donorPhoneNumber})
-            Message: Your donation offer for request #${match.requestId.substring(
-              0,
-              5
-            )} was not accepted this time. Thank you for your willingness to help.
-            --- END SIMULATION ---
-          `);
+         // Send rejection SMS
+        const message = `Your donation offer for request #${match.requestId.substring(0,5)} was not accepted this time. Thank you for your willingness to help.`;
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: match.donorPhoneNumber,
+            message: message,
+          }),
+        });
+
         toast({
           title: 'Offer Rejected',
           description: 'The offer has been declined.',

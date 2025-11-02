@@ -172,20 +172,7 @@ export default function DonatePage() {
     setDonating(request.id);
 
     try {
-      // TODO: This section does not send a real SMS. It simulates the action by logging to the console.
-      // To send a real SMS, you would need to replace the console.log
-      // with a call to a backend function or a third-party SMS service (e.g., Twilio).
-      console.log(`
-            --- SIMULATING SMS NOTIFICATION ---
-            This is not a real SMS. It is a console log acting as a placeholder.
-            To: Patient's Phone (${request.contactPhone})
-            From: BloodSync System
-            Message: A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your request.
-            Please go to "My Requests" in the app to accept and view their contact details.
-            --- END SIMULATION ---
-        `);
-
-      // Create a match document so the patient can see the offer
+      // 1. Create a match document so the patient can see the offer
       const matchCollection = collection(firestore, 'donationMatches');
       const newMatch = {
         requestId: request.id,
@@ -201,6 +188,18 @@ export default function DonatePage() {
       };
 
       await addDoc(matchCollection, newMatch);
+
+      // 2. Send the SMS notification via our new API endpoint
+      const message = `A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your request for ${request.bloodType} blood. Please go to "My Requests" in the app to accept.`;
+      
+      await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: request.contactPhone,
+          message: message,
+        }),
+      });
 
       toast({
         title: 'Offer Sent!',
