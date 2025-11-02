@@ -100,7 +100,7 @@ service cloud.firestore {
         let requestDoc = get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId));
         return request.auth.uid == requestDoc.data.userId;
       }
-      
+
       function isDonor() {
         return request.auth.uid == resource.data.donorId;
       }
@@ -112,9 +112,7 @@ service cloud.firestore {
       allow get, list: if request.auth != null;
 
       // Allow only the involved parties to update the match (e.g., to accept/reject).
-      // This rule is now correct, using get() to verify the owner of the *request*.
-      allow update: if (exists(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId)) && get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId)).data.userId == request.auth.uid) || isDonor();
-
+      allow update: if isRequestOwner() || isDonor();
 
       // Prevent deletion of donation matches.
       allow delete: if false;
@@ -136,7 +134,7 @@ service cloud.firestore {
       // Allow a user to read their own donation records.
       allow get: if request.auth.uid == resource.data.donorId;
 
-      // Allow authenticated users to list donations, but client queries must filter by donorId.
+      // Allow authenticated users to list donations. Client queries MUST filter by donorId.
       allow list: if request.auth != null;
 
       // Prevent updates and deletions to maintain data integrity.
@@ -147,7 +145,7 @@ service cloud.firestore {
      * @description Controls access to notifications.
      * @path /notifications/{notificationId}
      * @allow (create) Any authenticated user can create a notification for another user.
-     * @allow (read) Users can only read notifications intended for them.
+     * @allow (get, list) Users can only read notifications intended for them.
      * @allow (update) Users can update the `isRead` status of their own notifications.
      * @deny (delete) Deletion is not allowed.
      * @principle Enables a centralized notification system while maintaining privacy.
@@ -157,12 +155,15 @@ service cloud.firestore {
       // Allow creation if the user is authenticated and is not sending a notification to themselves.
       allow create: if request.auth != null && request.auth.uid != request.resource.data.userId;
 
-      // A user can read a notification if they are the recipient.
-      // The client query MUST use a where() clause to enforce this on list operations.
-      allow read: if request.auth.uid == resource.data.userId;
+      // Allow a user to get their own notification.
+      allow get: if request.auth != null && request.auth.uid == resource.data.userId;
+      
+      // Allow a user to list their own notifications.
+      // The client query MUST enforce this by filtering where `userId` == `request.auth.uid`.
+      allow list: if request.auth != null;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
-      allow update: if request.auth.uid == resource.data.userId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
       
       // Prevent deletion.
       allow delete: if false;
