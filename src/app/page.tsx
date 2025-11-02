@@ -197,8 +197,17 @@ export default function Home() {
         </section>
 
         {/* Quote Section */}
-        <section className="bg-primary/5 py-16 sm:py-24">
-          <div className="container mx-auto px-4">
+        <section className="relative bg-primary/5 py-16 sm:py-24">
+           {communityImage && (
+            <Image
+              src={communityImage.imageUrl}
+              alt={communityImage.description}
+              fill
+              className="object-cover object-center opacity-10"
+              data-ai-hint={communityImage.imageHint}
+            />
+          )}
+          <div className="relative z-10 container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
               <Quote className="mx-auto h-12 w-12 text-primary" />
               <blockquote className="mt-4">
