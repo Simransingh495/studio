@@ -76,44 +76,46 @@ export default function RequestBloodPage() {
   });
 
   useEffect(() => {
-    if (isClient && navigator.geolocation) {
-      setIsLocationLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            setUserCoords({ lat: latitude, lon: longitude });
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-            );
-            const data = await response.json();
-            if (data.address) {
-              const locationString = `${data.address.city || data.address.town || ''}, ${data.address.state || ''}`;
-              if (locationString.length > 2) {
-                form.setValue('location', locationString);
-              }
+    if (isClient) {
+        if (navigator.geolocation) {
+        setIsLocationLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+            try {
+                const { latitude, longitude } = position.coords;
+                setUserCoords({ lat: latitude, lon: longitude });
+                const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                );
+                const data = await response.json();
+                if (data.address) {
+                const locationString = `${data.address.city || data.address.town || ''}, ${data.address.state || ''}`;
+                if (locationString.length > 2) {
+                    form.setValue('location', locationString);
+                }
+                }
+            } catch (error) {
+                console.error('Error fetching location name:', error);
+                toast({
+                variant: 'destructive',
+                title: 'Could not fetch location name',
+                description: 'Please enter your location manually.',
+                });
+            } finally {
+                setIsLocationLoading(false);
             }
-          } catch (error) {
-            console.error('Error fetching location name:', error);
+            },
+            (error) => {
+            console.error('Geolocation error:', error);
             toast({
-              variant: 'destructive',
-              title: 'Could not fetch location name',
-              description: 'Please enter your location manually.',
+                variant: 'destructive',
+                title: 'Location permission denied',
+                description: 'Please enable location services or enter your location manually.',
             });
-          } finally {
             setIsLocationLoading(false);
-          }
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          toast({
-            variant: 'destructive',
-            title: 'Location permission denied',
-            description: 'Please enable location services or enter your location manually.',
-          });
-          setIsLocationLoading(false);
+            }
+        );
         }
-      );
     }
   }, [form, toast, isClient]);
 
@@ -292,7 +294,7 @@ export default function RequestBloodPage() {
                     </FormItem>
                   )}
                 />
-              <Button type="submit" disabled={isLoading || isLocationLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button type="submit" disabled={isLoading || (isClient && isLocationLoading)} className="bg-accent text-accent-foreground hover:bg-accent/90">
                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Submit Request
               </Button>
