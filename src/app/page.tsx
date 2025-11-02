@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { users, bloodRequests, donations } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
+import { Logo } from '@/components/logo';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
@@ -287,7 +288,7 @@ export default function Home() {
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row">
           <div className="flex flex-col items-center sm:items-start">
             <Link href="/">
-              <span className="text-lg font-bold">BloodSync</span>
+                <Logo className="text-primary" />
             </Link>
             <p className="text-sm text-muted-foreground">
               Saving lives, one drop at a time.
