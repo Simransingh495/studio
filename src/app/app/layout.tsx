@@ -31,6 +31,12 @@ const menuItems = [
   },
   {
     href: '/app/request-blood',
+    label: 'Request',
+    icon: Droplets,
+    isCentral: true,
+  },
+  {
+    href: '/app/app/donate', // Placeholder, can be same as request for now
     label: 'Donate',
     icon: HeartHandshake,
   },
@@ -56,6 +62,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isLoading = isUserLoading || isUserDataLoading;
   const userName = userData ? userData.firstName : 'User';
 
+  const regularItems = menuItems.filter(item => !item.isCentral);
+  const centralItem = menuItems.find(item => item.isCentral);
+
   return (
     <div className="flex min-h-screen flex-col bg-secondary">
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
@@ -74,8 +83,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
       <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       <footer className="sticky bottom-0 z-10 mt-auto border-t bg-background">
-        <nav className="mx-auto flex max-w-md items-center justify-around gap-2 px-4 py-2">
-          {menuItems.map((item) => {
+        <nav className="mx-auto grid grid-cols-5 max-w-md items-center justify-around gap-2 px-4 py-2">
+          {regularItems.slice(0, 2).map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
@@ -91,17 +100,37 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
-           <Link
-            href="/app/request-blood"
-            className="group relative flex items-center justify-center"
-            >
-            <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-background">
-                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-110">
-                    <Droplets className="h-8 w-8" />
-                </div>
-            </div>
-            <span className="sr-only">Request Blood</span>
-          </Link>
+
+          {centralItem && (
+             <Link
+              href={centralItem.href}
+              className="group relative flex items-center justify-center"
+              >
+              <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-110">
+                      <centralItem.icon className="h-8 w-8" />
+                  </div>
+              </div>
+              <span className="sr-only">{centralItem.label}</span>
+            </Link>
+          )}
+          
+          {regularItems.slice(2).map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-col items-center gap-1 rounded-md p-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+                  isActive && 'text-primary'
+                )}
+              >
+                <item.icon className="h-6 w-6" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </footer>
     </div>
