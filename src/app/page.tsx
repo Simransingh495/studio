@@ -43,19 +43,19 @@ export default function Home() {
       icon: UserPlus,
       title: 'Register Seamlessly',
       description:
-        'Create your secure profile in minutes. Add your blood type, location, and availability to join our network of lifesavers.',
+        'Create your secure profile in minutes. Add your blood type, location, and availability to join our network of lifesavers. Our guided process makes it easy to get started, and your information is kept secure and private.',
     },
     {
       icon: Search,
       title: 'Find or Request Blood',
       description:
-        'Patients can instantly search for donors, while our system broadcasts urgent requests to all available and compatible donors in the area.',
+        'Patients can instantly search for nearby donors using our map-based interface. In urgent situations, our system broadcasts requests to all available and compatible donors in the area, ensuring rapid response times.',
     },
     {
       icon: HeartHandshake,
       title: 'Connect and Save Lives',
       description:
-        'Our platform facilitates a direct connection between donors and recipients, ensuring timely communication for life-saving donations.',
+        'Our platform facilitates a direct and secure connection between donors and recipients. Once a match is found, you can communicate to coordinate the donation, ensuring a timely and life-saving contribution.',
     },
   ];
 
@@ -63,22 +63,22 @@ export default function Home() {
     {
       icon: BrainCircuit,
       title: 'AI Smart Matching',
-      description: 'Our advanced AI algorithm instantly finds the most compatible donors based on blood type, location, availability, and donation history, ensuring the best match in critical situations.'
+      description: 'Our advanced AI algorithm instantly finds the most compatible donors based on blood type, location, availability, and donation history, ensuring the best match in critical situations. This intelligent system significantly reduces the time to find a suitable donor.'
     },
     {
       icon: MapPin,
       title: 'Geolocation-Based Search',
-      description: 'Quickly find donors in your immediate vicinity with our automatic location detection, minimizing travel time and accelerating the donation process.'
+      description: 'Quickly find donors in your immediate vicinity with our automatic location detection and interactive map. This feature minimizes travel time and accelerates the donation process when every second counts.'
     },
     {
       icon: Bell,
       title: 'Real-time Notifications',
-      description: 'Receive instant alerts for urgent blood requests in your area, allowing you to respond quickly and make a timely, life-saving impact.'
+      description: 'Receive instant push notifications and alerts for urgent blood requests in your area. This allows you to respond quickly and make a timely, life-saving impact, whether you are at home or on the go.'
     },
     {
       icon: LifeBuoy,
       title: 'Urgent Request Broadcasting',
-      description: 'Post an urgent blood request and have it instantly broadcast to all suitable donors nearby, maximizing the chances of a quick response.'
+      description: 'In an emergency, post an urgent blood request and have it instantly broadcast to all suitable donors nearby. This powerful feature maximizes the chances of a quick response from our community of heroes.'
     }
   ]
 
@@ -151,7 +151,7 @@ export default function Home() {
                 How BloodSync Works
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Our mission is to create a seamless, efficient, and community-driven network to save lives. We believe that technology can solve the critical problem of blood shortages by connecting people in a timely and intelligent manner.
+                Our mission is to create a seamless, efficient, and community-driven network to save lives. We believe that technology can solve the critical problem of blood shortages by connecting people in a timely and intelligent manner. Our platform is built on three simple principles.
               </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -180,7 +180,7 @@ export default function Home() {
                 Powerful Platform Features
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                We've built a suite of powerful tools designed to make the process of donating and receiving blood simpler and more efficient than ever before.
+                We've built a suite of powerful tools designed to make the process of donating and receiving blood simpler and more efficient than ever before. Explore how our technology is making a difference.
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-2 lg:grid-cols-2">
@@ -220,7 +220,7 @@ export default function Home() {
                   Join Our Community of Lifesavers
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground">
-                  Become a registered donor on BloodSync today and be a hero in someone's story. Your single act of kindness can save up to three lives.
+                  Become a registered donor on BloodSync today and be a hero in someone's story. Your single act of kindness can save up to three lives. Together, we can build a network of hope.
                 </p>
                 <div className="mt-8">
                    <Button asChild size="lg" className="rounded-full">
