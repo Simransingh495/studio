@@ -56,8 +56,9 @@ export default function MyRequestsPage() {
       user
         ? query(
             collection(firestore, 'bloodRequests'),
-            where('userId', '==', user.uid),
-            orderBy('createdAt', 'desc')
+            where('userId', '==', user.uid)
+            // Removing orderBy to prevent Firestore internal assertion error
+            // orderBy('createdAt', 'desc')
           )
         : null,
     [firestore, user]
@@ -65,9 +66,15 @@ export default function MyRequestsPage() {
   const { data: requests, isLoading: isRequestsLoading } =
     useCollection<BloodRequest>(requestsQuery);
 
+  // Sort requests on the client-side
+  const sortedRequests = useMemo(() => {
+    if (!requests) return [];
+    return [...requests].sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+  }, [requests]);
+
   const requestIds = useMemo(
-    () => (requests ? requests.map((r) => r.id) : []),
-    [requests]
+    () => (sortedRequests ? sortedRequests.map((r) => r.id) : []),
+    [sortedRequests]
   );
 
   const matchesQuery = useMemoFirebase(
@@ -92,7 +99,7 @@ export default function MyRequestsPage() {
 
     const matchRef = doc(firestore, 'donationMatches', match.id);
     const requestRef = doc(firestore, 'bloodRequests', match.requestId);
-    const requestDoc = requests?.find((r) => r.id === match.requestId);
+    const requestDoc = sortedRequests?.find((r) => r.id === match.requestId);
 
     try {
       await updateDoc(matchRef, { status: response });
@@ -176,7 +183,7 @@ export default function MyRequestsPage() {
         <CardHeader>
           <CardTitle>Your Requests</CardTitle>
           <CardDescription>
-            You have made {requests?.length ?? 0} requests.
+            You have made {sortedRequests?.length ?? 0} requests.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -186,9 +193,9 @@ export default function MyRequestsPage() {
               <Skeleton className="h-24 w-full" />
             </div>
           )}
-          {!isLoading && requests && requests.length > 0 ? (
+          {!isLoading && sortedRequests && sortedRequests.length > 0 ? (
             <Accordion type="single" collapsible className="w-full space-y-4">
-              {requests.map((request) => {
+              {sortedRequests.map((request) => {
                 const pendingOffers =
                   matches?.filter(
                     (m) => m.requestId === request.id && m.status === 'pending'
@@ -357,3 +364,5 @@ export default function MyRequestsPage() {
     </div>
   );
 }
+
+    
