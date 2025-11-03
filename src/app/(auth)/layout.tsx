@@ -1,6 +1,5 @@
 
 import { Logo } from '@/components/logo';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Link from 'next/link';
 
 export default function AuthLayout({
@@ -9,7 +8,6 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <FirebaseClientProvider>
       <div className="flex min-h-screen flex-col items-center justify-center bg-secondary/50 p-4">
         <div className="absolute top-4 left-4">
           <Link href="/">
@@ -18,6 +16,5 @@ export default function AuthLayout({
         </div>
         {children}
       </div>
-    </FirebaseClientProvider>
   );
 }

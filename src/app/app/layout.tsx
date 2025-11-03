@@ -14,7 +14,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
-import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Notification } from '@/lib/types';
@@ -68,7 +68,7 @@ function RealtimeNotificationListener() {
 }
 
 
-function AppLayoutContent({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -182,13 +182,4 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       </footer>
     </div>
   );
-}
-
-
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <FirebaseClientProvider>
-            <AppLayoutContent>{children}</AppLayoutContent>
-        </FirebaseClientProvider>
-    )
 }

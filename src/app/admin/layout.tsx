@@ -22,7 +22,6 @@ import {
   LayoutDashboard,
   Users,
 } from 'lucide-react';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 const menuItems = [
   {
@@ -47,7 +46,7 @@ const menuItems = [
   },
 ];
 
-function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -88,12 +87,4 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
     </SidebarProvider>
   );
-}
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <FirebaseClientProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </FirebaseClientProvider>
-  )
 }
