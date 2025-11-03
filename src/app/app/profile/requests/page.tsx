@@ -104,8 +104,8 @@ export default function MyRequestsPage() {
       
       const notificationCollection = collection(firestore, 'notifications');
       
-      let smsMessage = '';
-      let smsPhoneNumber = '';
+      let notificationMessage = '';
+      let recipientPhoneNumber = '';
 
       if (response === 'accepted' && requestDoc) {
         await updateDoc(requestRef, { status: 'Fulfilled' });
@@ -131,11 +131,11 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, acceptedInAppNotification);
 
-        smsMessage = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone}. Thank you! - BloodSync`;
+        notificationMessage = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone}. Thank you! - BloodSync`;
         const donorUserDoc = await doc(firestore, 'users', match.donorId);
         // This assumes phone number is stored on the donor's user doc.
         const donorUser = (await donorUserDoc.get()).data() as User;
-        smsPhoneNumber = donorUser.phoneNumber || '';
+        recipientPhoneNumber = donorUser.phoneNumber || '';
 
 
         toast({
@@ -167,18 +167,16 @@ export default function MyRequestsPage() {
         });
       }
       
-      if (smsMessage && smsPhoneNumber) {
-         const smsResponse = await fetch('/api/send-sms', {
+      if (notificationMessage && recipientPhoneNumber) {
+         await fetch('/api/send-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber: smsPhoneNumber, message: smsMessage }),
+            body: JSON.stringify({
+              phoneNumber: recipientPhoneNumber,
+              message: notificationMessage,
+              type: 'WhatsApp'
+            }),
         });
-         if (!smsResponse.ok) {
-            const errorData = await smsResponse.json();
-            console.error("SMS Error:", errorData.error);
-            // Non-critical, so we don't throw, just log.
-            toast({ variant: "destructive", title: "SMS Failed", description: `Could not notify donor via SMS: ${errorData.error}` });
-        }
       }
 
 

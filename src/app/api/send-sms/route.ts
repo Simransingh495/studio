@@ -1,41 +1,32 @@
 
 import { NextResponse } from 'next/server';
 
+// This is a SIMULATED notification service. It does not send real WhatsApp messages.
+// It logs the intended message to the server console for development and testing purposes.
+
 export async function POST(request: Request) {
   try {
-    const { phoneNumber, message } = await request.json();
+    const { phoneNumber, message, type = 'SMS' } = await request.json();
 
-    if (!process.env.FAST2SMS_API_KEY) {
-      return NextResponse.json({ success: false, error: 'Fast2SMS API key is not configured.' }, { status: 500 });
-    }
-    
     if (!phoneNumber || !message) {
         return NextResponse.json({ success: false, error: 'Phone number and message are required.' }, { status: 400 });
     }
 
-    const encodedMessage = encodeURIComponent(message);
-    const url = 'https://www.fast2sms.com/dev/bulkV2';
+    // Simulate sending the notification by logging it to the console.
+    console.log('--- SIMULATED NOTIFICATION ---');
+    console.log(`Type: ${type.toUpperCase()}`);
+    console.log(`To: ${phoneNumber}`);
+    console.log(`Message: ${message}`);
+    console.log('-----------------------------');
 
-    const options = {
-        method: 'POST',
-        headers: {
-            'authorization': process.env.FAST2SMS_API_KEY,
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `route=v3&sender_id=FTWSMS&message=${encodedMessage}&language=english&flash=0&numbers=${phoneNumber}`,
-    };
-
-    const fast2smsResponse = await fetch(url, options);
-    const data = await fast2smsResponse.json();
-
-    if (data.return) {
-        return NextResponse.json({ success: true, data });
-    } else {
-        return NextResponse.json({ success: false, error: data.message || 'Failed to send SMS' }, { status: 500 });
-    }
+    // Always return a success response in simulation mode.
+    return NextResponse.json({ 
+        success: true, 
+        message: `Simulated ${type.toUpperCase()} notification sent successfully.` 
+    });
 
   } catch (error: any) {
-    console.error('SMS API Error:', error);
+    console.error('SIMULATED API Error:', error);
     return NextResponse.json({ success: false, error: error.message || 'An unknown error occurred.' }, { status: 500 });
   }
 }

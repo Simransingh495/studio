@@ -104,19 +104,18 @@ export default function OverviewPage() {
       };
       await addDoc(notificationCollection, newNotification);
 
-      // 3. Send an SMS notification
+      // 3. Send a simulated WhatsApp notification
       if (request.contactPhone) {
-        const smsMessage = `Good news! A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your blood request. Please check the BloodSync app for details.`;
-        const smsResponse = await fetch('/api/send-sms', {
+        const whatsappMessage = `Good news! A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your blood request. Please check the BloodSync app for details.`;
+        await fetch('/api/send-sms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phoneNumber: request.contactPhone, message: smsMessage }),
+          body: JSON.stringify({
+            phoneNumber: request.contactPhone,
+            message: whatsappMessage,
+            type: 'WhatsApp'
+          }),
         });
-
-        if (!smsResponse.ok) {
-          const errorData = await smsResponse.json();
-          throw new Error(errorData.error || 'Failed to send SMS notification.');
-        }
       }
 
       toast({
