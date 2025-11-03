@@ -162,8 +162,7 @@ service cloud.firestore {
       allow get: if request.auth.uid == resource.data.userId;
       
       // A user can query notifications only if their query is filtered by their own userId.
-      // This prevents listing all notifications in the system.
-      allow list: if request.auth != null && request.query.where.get('userId', ['==', request.auth.uid]).size() == 1;
+      allow list: if request.auth != null && request.query.where.get("userId", ["==", request.auth.uid]).size() == 1;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
       allow update: if request.auth.uid == resource.data.userId;
@@ -173,5 +172,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

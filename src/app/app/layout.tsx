@@ -14,40 +14,11 @@ import {
   Bell,
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
-import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
-import { doc, collection, query, where, limit } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Notification } from '@/lib/types';
-
-const menuItems = [
-  {
-    href: '/app/overview',
-    label: 'Home',
-    icon: LayoutDashboard,
-  },
-  {
-    href: '/app/find-donors',
-    label: 'Search',
-    icon: Search,
-  },
-  {
-    href: '/app/request-blood',
-    label: 'Request',
-    icon: Droplets,
-    isCentral: true,
-  },
-  {
-    href: '/app/donate',
-    label: 'Donate',
-    icon: HeartHandshake,
-  },
-  {
-    href: '/app/profile',
-    label: 'Profile',
-    icon: User,
-  },
-];
-
+import { Button } from '@/components/ui/button';
 
 function RealtimeNotificationListener() {
   const { user } = useUser();
@@ -61,7 +32,6 @@ function RealtimeNotificationListener() {
             collection(firestore, 'notifications'),
             where('userId', '==', user.uid),
             where('isRead', '==', false),
-            limit(5)
           )
         : null,
     [firestore, user]
@@ -112,6 +82,35 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   const isLoading = isUserLoading || isUserDataLoading;
   const userName = userData ? userData.firstName : 'User';
+
+  const menuItems = [
+    {
+      href: '/app/overview',
+      label: 'Home',
+      icon: LayoutDashboard,
+    },
+    {
+      href: '/app/find-donors',
+      label: 'Search',
+      icon: Search,
+    },
+    {
+      href: '/app/request-blood',
+      label: 'Request',
+      icon: Droplets,
+      isCentral: true,
+    },
+    {
+      href: '/app/donate',
+      label: 'Donate',
+      icon: HeartHandshake,
+    },
+    {
+      href: '/app/profile',
+      label: 'Profile',
+      icon: User,
+    },
+  ];
 
   const regularItems = menuItems.filter(item => !item.isCentral);
   const centralItem = menuItems.find(item => item.isCentral);
