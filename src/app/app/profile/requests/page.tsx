@@ -137,7 +137,8 @@ export default function MyRequestsPage() {
 
 
         if (!smsResponse.ok) {
-          throw new Error('Failed to send acceptance SMS.');
+          const errorBody = await smsResponse.json();
+          throw new Error(errorBody.details || 'Failed to send acceptance SMS.');
         }
 
         toast({

@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Twilio API Error:', error);
+    // Return the specific error message from Twilio for better client-side debugging
     return NextResponse.json(
       { error: 'Failed to send SMS.', details: error.message },
       { status: 500 }

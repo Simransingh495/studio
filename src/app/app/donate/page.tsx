@@ -215,7 +215,8 @@ export default function DonatePage() {
       const smsResponse = await sendSmsNotification(request.contactPhone, smsBody);
 
       if (!smsResponse.ok) {
-          throw new Error('Failed to send SMS notification.');
+          const errorBody = await smsResponse.json();
+          throw new Error(errorBody.details || 'Failed to send SMS notification.');
       }
 
       toast({

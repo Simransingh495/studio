@@ -119,7 +119,8 @@ export default function OverviewPage() {
 
 
       if (!smsResponse.ok) {
-          throw new Error('Failed to send SMS notification.');
+          const errorBody = await smsResponse.json();
+          throw new Error(errorBody.details || 'Failed to send SMS notification.');
       }
 
       toast({
