@@ -139,7 +139,7 @@ service cloud.firestore {
 
       // Allow authenticated users to list ONLY their own donations.
       // This rule requires the client query to include a `where('donorId', '==', request.auth.uid)` filter.
-      allow list: if request.auth != null && request.query.get("donorId") == request.auth.uid;
+      allow list: if request.auth != null && request.query.where.get('donorId', ['==', request.auth.uid]) != null;
 
       // Prevent updates and deletions to maintain data integrity.
       allow update, delete: if false;
@@ -163,7 +163,7 @@ service cloud.firestore {
       
       // A user can query notifications ONLY if their query is filtered by their own userId.
       // This is the correct and secure way to enforce this rule.
-      allow list: if request.auth != null && request.query.where.get('userId', '==', request.auth.uid) != null;
+      allow list: if request.auth != null && request.query.where.get('userId', ['==', request.auth.uid]) != null;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
       allow update: if request.auth.uid == resource.data.userId;
