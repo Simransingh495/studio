@@ -187,7 +187,7 @@ export default function DonatePage() {
         matchDate: serverTimestamp(),
         status: 'pending',
       };
-      await addDoc(matchCollection, newMatch);
+      const matchDoc = await addDoc(matchCollection, newMatch);
 
       // 2. Create an in-app notification for the patient
       const notificationCollection = collection(firestore, 'notifications');
@@ -195,7 +195,7 @@ export default function DonatePage() {
         userId: request.userId,
         message: `A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your request for ${request.bloodType} blood.`,
         type: 'request_match',
-        relatedId: request.id,
+        relatedId: matchDoc.id,
         isRead: false,
         createdAt: serverTimestamp(),
       };
