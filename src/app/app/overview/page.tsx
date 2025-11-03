@@ -25,11 +25,11 @@ import { LifeBuoy, Share, HeartHandshake, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
-async function sendEmailNotification(to: string, subject: string, html: string) {
-    const response = await fetch('/api/send-email', {
+async function sendSmsNotification(to: string, body: string) {
+    const response = await fetch('/api/send-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, html }),
+        body: JSON.stringify({ to, body }),
     });
     return response;
 }
@@ -113,12 +113,13 @@ export default function OverviewPage() {
       };
       await addDoc(notificationCollection, newNotification);
 
-      // 3. Send a real email notification
-      const emailHtml = `<h1>New Donation Offer!</h1><p>A donor has offered to help with your blood request.</p><p><b>Donor:</b> ${currentUserData.firstName}</p><p><b>Blood Type:</b> ${currentUserData.bloodType}</p><p>Please log in to your BloodSync account to view the offer and accept it.</p>`;
-      const emailResponse = await sendEmailNotification(request.contactEmail, "You have a new blood donation offer!", emailHtml);
+      // 3. Send an SMS notification
+      const smsBody = `BloodSync: New donation offer! A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to help. Log in to your account to accept.`;
+      const smsResponse = await sendSmsNotification(request.contactPhone, smsBody);
 
-      if (!emailResponse.ok) {
-          throw new Error('Failed to send email notification.');
+
+      if (!smsResponse.ok) {
+          throw new Error('Failed to send SMS notification.');
       }
 
       toast({

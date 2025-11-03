@@ -45,11 +45,11 @@ import {
 } from '@/components/ui/accordion';
 import { format } from 'date-fns';
 
-async function sendEmailNotification(to: string, subject: string, html: string) {
-    const response = await fetch('/api/send-email', {
+async function sendSmsNotification(to: string, body: string) {
+    const response = await fetch('/api/send-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, html }),
+        body: JSON.stringify({ to, body }),
     });
     return response;
 }
@@ -132,11 +132,12 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, acceptedInAppNotification);
 
-        const emailHtml = `<h1>Your Offer was Accepted!</h1><p>Your offer to donate ${requestDoc.bloodType} blood has been accepted by ${requestDoc.patientName}.</p><p><b>Patient Contact Email:</b> ${requestDoc.contactEmail}</p><p><b>Patient Contact Phone:</b> ${requestDoc.contactPhone}</p><p>Please coordinate with them directly. Thank you for being a hero!</p>`;
-        const emailResponse = await sendEmailNotification(match.donorEmail, 'Your Blood Donation Offer Was Accepted!', emailHtml);
+        const smsBody = `BloodSync: Your offer for ${requestDoc.bloodType} blood was accepted! Contact the patient at ${requestDoc.contactPhone}. Thank you!`;
+        const smsResponse = await sendSmsNotification(match.donorPhoneNumber, smsBody);
 
-        if (!emailResponse.ok) {
-          throw new Error('Failed to send acceptance email.');
+
+        if (!smsResponse.ok) {
+          throw new Error('Failed to send acceptance SMS.');
         }
 
         toast({
@@ -148,8 +149,8 @@ export default function MyRequestsPage() {
         if (otherPendingMatches) {
           for (const otherMatch of otherPendingMatches) {
             await updateDoc(doc(firestore, 'donationMatches', otherMatch.id), { status: 'rejected' });
-            const rejectedEmailHtml = `<h1>Donation Offer Update</h1><p>Thank you for offering to donate for the request for ${requestDoc.bloodType} blood. The patient has already found a suitable donor for this request.</p><p>We appreciate your willingness to help and hope you'll consider other requests. Thank you for being a part of BloodSync!</p>`;
-            await sendEmailNotification(otherMatch.donorEmail, "Update on your donation offer", rejectedEmailHtml);
+            const rejectedSmsBody = `BloodSync: Thank you for offering to donate for the request for ${requestDoc.bloodType} blood. The patient has already found a suitable donor for this request. We appreciate your willingness to help!`;
+            await sendSmsNotification(otherMatch.donorPhoneNumber, rejectedSmsBody);
           }
         }
 
@@ -164,8 +165,8 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, rejectedInAppNotification);
 
-        const rejectedEmailHtml = `<h1>Donation Offer Update</h1><p>Thank you for offering to donate for the request for ${requestDoc.bloodType} blood. Your offer was not accepted at this time.</p><p>We appreciate your willingness to help and hope you'll consider other requests. Thank you for being a part of BloodSync!</p>`;
-        await sendEmailNotification(match.donorEmail, "Update on your donation offer", rejectedEmailHtml);
+        const rejectedSmsBody = `BloodSync: Thank you for your offer for ${requestDoc.bloodType} blood. It was not accepted at this time. We appreciate you!`;
+        await sendSmsNotification(match.donorPhoneNumber, rejectedSmsBody);
 
         toast({
           title: 'Offer Rejected',
