@@ -56,7 +56,8 @@ export default function MyRequestsPage() {
       user
         ? query(
             collection(firestore, 'bloodRequests'),
-            where('userId', '==', user.uid)
+            where('userId', '==', user.uid),
+            orderBy('createdAt', 'desc')
           )
         : null,
     [firestore, user]
@@ -64,15 +65,9 @@ export default function MyRequestsPage() {
   const { data: requests, isLoading: isRequestsLoading } =
     useCollection<BloodRequest>(requestsQuery);
 
-  // Sort requests on the client-side
-  const sortedRequests = useMemo(() => {
-    if (!requests) return [];
-    return [...requests].sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
-  }, [requests]);
-
   const requestIds = useMemo(
-    () => (sortedRequests ? sortedRequests.map((r) => r.id) : []),
-    [sortedRequests]
+    () => (requests ? requests.map((r) => r.id) : []),
+    [requests]
   );
 
   const matchesQuery = useMemoFirebase(
@@ -97,15 +92,13 @@ export default function MyRequestsPage() {
 
     const matchRef = doc(firestore, 'donationMatches', match.id);
     const requestRef = doc(firestore, 'bloodRequests', match.requestId);
-    const requestDoc = sortedRequests?.find((r) => r.id === match.requestId);
+    const requestDoc = requests?.find((r) => r.id === match.requestId);
 
     try {
       await updateDoc(matchRef, { status: response });
       
       const notificationCollection = collection(firestore, 'notifications');
       
-      let pushMessage = '';
-
       if (response === 'accepted' && requestDoc) {
         await updateDoc(requestRef, { status: 'Fulfilled' });
 
@@ -130,8 +123,6 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, acceptedInAppNotification);
 
-        pushMessage = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone}. Thank you! - BloodSync`;
-
         toast({
           title: 'Match Accepted!',
           description: 'The donor has been notified with your contact details.',
@@ -141,6 +132,15 @@ export default function MyRequestsPage() {
         if (otherPendingMatches) {
           for (const otherMatch of otherPendingMatches) {
             await updateDoc(doc(firestore, 'donationMatches', otherMatch.id), { status: 'rejected' });
+             const rejectedInAppNotification: Omit<Notification, 'id'> = {
+              userId: otherMatch.donorId,
+              message: `Your offer for request #${match.requestId.substring(0, 5)} was not accepted this time. Thank you for your generosity.`,
+              type: 'offer_rejected',
+              relatedId: match.requestId,
+              isRead: false,
+              createdAt: serverTimestamp(),
+            };
+            await addDoc(notificationCollection, rejectedInAppNotification);
           }
         }
 
@@ -160,19 +160,6 @@ export default function MyRequestsPage() {
           description: 'The offer has been declined and the donor has been notified.',
         });
       }
-      
-      if (pushMessage) {
-         await fetch('/api/send-sms', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              recipientUserId: match.donorId,
-              message: pushMessage
-            }),
-        });
-      }
-
-
     } catch (err: any) {
       console.error('Error responding to match: ', err);
       toast({ variant: 'destructive', title: 'Error', description: err.message });
@@ -198,7 +185,7 @@ export default function MyRequestsPage() {
         <CardHeader>
           <CardTitle>Your Requests</CardTitle>
           <CardDescription>
-            You have made {sortedRequests?.length ?? 0} requests.
+            You have made {requests?.length ?? 0} requests.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -208,9 +195,9 @@ export default function MyRequestsPage() {
               <Skeleton className="h-24 w-full" />
             </div>
           )}
-          {!isLoading && sortedRequests && sortedRequests.length > 0 ? (
+          {!isLoading && requests && requests.length > 0 ? (
             <Accordion type="single" collapsible className="w-full space-y-4">
-              {sortedRequests.map((request) => {
+              {requests.map((request) => {
                 const pendingOffers =
                   matches?.filter(
                     (m) => m.requestId === request.id && m.status === 'pending'

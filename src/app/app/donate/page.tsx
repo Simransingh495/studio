@@ -201,17 +201,6 @@ export default function DonatePage() {
       };
       await addDoc(notificationCollection, newNotification);
 
-      // 3. Send a simulated push notification
-      const pushMessage = `Good news! A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to fulfill your blood request. Please check the BloodSync app for details.`;
-      await fetch('/api/send-sms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipientUserId: request.userId,
-          message: pushMessage
-        }),
-      });
-
       toast({
         title: 'Offer Sent!',
         description: `The patient has been notified of your offer.`,
