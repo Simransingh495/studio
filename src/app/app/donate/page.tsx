@@ -29,15 +29,6 @@ import * as geofire from 'geofire-common';
 
 type RequestWithDistance = BloodRequest & { distance?: number };
 
-async function sendSmsNotification(to: string, body: string) {
-    const response = await fetch('/api/send-sms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, body }),
-    });
-    return response;
-}
-
 
 export default function DonatePage() {
   const firestore = useFirestore();
@@ -209,15 +200,6 @@ export default function DonatePage() {
         createdAt: serverTimestamp(),
       };
       await addDoc(notificationCollection, newNotification);
-
-      // 3. Send an SMS notification
-      const smsBody = `BloodSync: New donation offer! A donor (${currentUserData.firstName}, Blood Type: ${currentUserData.bloodType}) has offered to help. Log in to your account to accept.`;
-      const smsResponse = await sendSmsNotification(request.contactPhone, smsBody);
-
-      if (!smsResponse.ok) {
-          const errorBody = await smsResponse.json();
-          throw new Error(errorBody.details || 'Failed to send SMS notification.');
-      }
 
       toast({
         title: 'Offer Sent!',

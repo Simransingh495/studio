@@ -45,15 +45,6 @@ import {
 } from '@/components/ui/accordion';
 import { format } from 'date-fns';
 
-async function sendSmsNotification(to: string, body: string) {
-    const response = await fetch('/api/send-sms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, body }),
-    });
-    return response;
-}
-
 export default function MyRequestsPage() {
   const firestore = useFirestore();
   const { user } = useUser();
@@ -132,15 +123,6 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, acceptedInAppNotification);
 
-        const smsBody = `BloodSync: Your offer for ${requestDoc.bloodType} blood was accepted! Contact the patient at ${requestDoc.contactPhone}. Thank you!`;
-        const smsResponse = await sendSmsNotification(match.donorPhoneNumber, smsBody);
-
-
-        if (!smsResponse.ok) {
-          const errorBody = await smsResponse.json();
-          throw new Error(errorBody.details || 'Failed to send acceptance SMS.');
-        }
-
         toast({
           title: 'Match Accepted!',
           description: 'The donor has been notified with your contact details.',
@@ -150,8 +132,6 @@ export default function MyRequestsPage() {
         if (otherPendingMatches) {
           for (const otherMatch of otherPendingMatches) {
             await updateDoc(doc(firestore, 'donationMatches', otherMatch.id), { status: 'rejected' });
-            const rejectedSmsBody = `BloodSync: Thank you for offering to donate for the request for ${requestDoc.bloodType} blood. The patient has already found a suitable donor for this request. We appreciate your willingness to help!`;
-            await sendSmsNotification(otherMatch.donorPhoneNumber, rejectedSmsBody);
           }
         }
 
@@ -165,9 +145,6 @@ export default function MyRequestsPage() {
           createdAt: serverTimestamp(),
         };
         await addDoc(notificationCollection, rejectedInAppNotification);
-
-        const rejectedSmsBody = `BloodSync: Thank you for your offer for ${requestDoc.bloodType} blood. It was not accepted at this time. We appreciate you!`;
-        await sendSmsNotification(match.donorPhoneNumber, rejectedSmsBody);
 
         toast({
           title: 'Offer Rejected',
