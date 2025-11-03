@@ -161,8 +161,9 @@ service cloud.firestore {
       // A user can read a single notification if they are the recipient.
       allow get: if request.auth.uid == resource.data.userId;
       
-      // A user can query notifications only if their query is filtered by their own userId.
-      allow list: if request.auth != null && request.query.get("userId") == request.auth.uid;
+      // A user can query notifications ONLY if their query is filtered by their own userId.
+      // This is the correct and secure way to enforce this rule.
+      allow list: if request.auth != null && request.query.where.get('userId', '==', request.auth.uid) != null;
 
       // Allow a user to update their own notification (e.g., to mark it as read).
       allow update: if request.auth.uid == resource.data.userId;

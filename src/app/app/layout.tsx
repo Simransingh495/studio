@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where } from 'firebase/firestore';
+import { doc, collection, query, where, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Notification } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -25,13 +25,14 @@ function RealtimeNotificationListener() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
+  // Simplified query to only filter by userId, which is more robust for security rules.
+  // The isRead check will be handled on the client.
   const notificationsQuery = useMemoFirebase(
     () =>
       user
         ? query(
             collection(firestore, 'notifications'),
-            where('userId', '==', user.uid),
-            where('isRead', '==', false),
+            where('userId', '==', user.uid)
           )
         : null,
     [firestore, user]
@@ -39,14 +40,13 @@ function RealtimeNotificationListener() {
   
   const { data: notifications } = useCollection<Notification>(notificationsQuery);
 
-  // Use a ref to track which notifications have already been toasted
   const toastedIds = React.useRef(new Set());
 
   React.useEffect(() => {
     if (notifications && notifications.length > 0) {
       notifications.forEach((notification) => {
-        // Only show a toast for new notifications that haven't been shown yet
-        if (!toastedIds.current.has(notification.id)) {
+        // Only show a toast for new, unread notifications that haven't been shown yet
+        if (!notification.isRead && !toastedIds.current.has(notification.id)) {
           toast({
             title: 'New Notification',
             description: notification.message,
@@ -63,7 +63,6 @@ function RealtimeNotificationListener() {
     }
   }, [notifications, toast]);
 
-  // This component doesn't render anything visible
   return null;
 }
 
