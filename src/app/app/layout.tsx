@@ -11,10 +11,13 @@ import {
   User,
   Droplets,
   Loader2,
+  Bell,
 } from 'lucide-react';
 import { UserNav } from '@/components/user-nav';
-import { useUser, useFirestore, useDoc, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase, FirebaseClientProvider } from '@/firebase';
+import { doc, collection, query, where, limit } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import type { Notification } from '@/lib/types';
 
 const menuItems = [
   {
@@ -45,6 +48,56 @@ const menuItems = [
   },
 ];
 
+
+function RealtimeNotificationListener() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
+  const notificationsQuery = useMemoFirebase(
+    () =>
+      user
+        ? query(
+            collection(firestore, 'notifications'),
+            where('userId', '==', user.uid),
+            where('isRead', '==', false),
+            limit(5)
+          )
+        : null,
+    [firestore, user]
+  );
+  
+  const { data: notifications } = useCollection<Notification>(notificationsQuery);
+
+  // Use a ref to track which notifications have already been toasted
+  const toastedIds = React.useRef(new Set());
+
+  React.useEffect(() => {
+    if (notifications && notifications.length > 0) {
+      notifications.forEach((notification) => {
+        // Only show a toast for new notifications that haven't been shown yet
+        if (!toastedIds.current.has(notification.id)) {
+          toast({
+            title: 'New Notification',
+            description: notification.message,
+            action: (
+               <Link href="/app/profile/notifications">
+                <Button variant="secondary" size="sm">View</Button>
+               </Link>
+            ),
+          });
+          // Add the notification id to the set to prevent re-toasting
+          toastedIds.current.add(notification.id);
+        }
+      });
+    }
+  }, [notifications, toast]);
+
+  // This component doesn't render anything visible
+  return null;
+}
+
+
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
@@ -65,6 +118,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-secondary">
+      <RealtimeNotificationListener />
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
         {isLoading ? (
            <Loader2 className="h-6 w-6 animate-spin" />
