@@ -104,8 +104,7 @@ export default function MyRequestsPage() {
       
       const notificationCollection = collection(firestore, 'notifications');
       
-      let notificationMessage = '';
-      let recipientPhoneNumber = '';
+      let pushMessage = '';
 
       if (response === 'accepted' && requestDoc) {
         await updateDoc(requestRef, { status: 'Fulfilled' });
@@ -131,12 +130,7 @@ export default function MyRequestsPage() {
         };
         await addDoc(notificationCollection, acceptedInAppNotification);
 
-        notificationMessage = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone}. Thank you! - BloodSync`;
-        const donorUserDoc = await doc(firestore, 'users', match.donorId);
-        // This assumes phone number is stored on the donor's user doc.
-        const donorUser = (await donorUserDoc.get()).data() as User;
-        recipientPhoneNumber = donorUser.phoneNumber || '';
-
+        pushMessage = `Your donation offer for ${requestDoc.bloodType} blood has been accepted! Please contact the patient at ${requestDoc.contactPhone}. Thank you! - BloodSync`;
 
         toast({
           title: 'Match Accepted!',
@@ -167,14 +161,13 @@ export default function MyRequestsPage() {
         });
       }
       
-      if (notificationMessage && recipientPhoneNumber) {
+      if (pushMessage) {
          await fetch('/api/send-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              phoneNumber: recipientPhoneNumber,
-              message: notificationMessage,
-              type: 'WhatsApp'
+              recipientUserId: match.donorId,
+              message: pushMessage
             }),
         });
       }
