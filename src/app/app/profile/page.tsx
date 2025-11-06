@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
+  Bell,
   List,
   LogOut,
   Settings,
@@ -114,6 +115,7 @@ export default function ProfilePage() {
     { label: 'Donation History', icon: List, href: '/app/profile/donations' },
     { label: 'My Requests', icon: List, href: '/app/profile/requests' },
     { label: 'Set Timer', icon: Timer, href: '/app/profile/reminder' },
+    { label: 'Notifications', icon: Bell, href: '/app/profile/notifications' },
     { label: 'Settings', icon: Settings, href: '/app/profile/settings' },
   ];
 

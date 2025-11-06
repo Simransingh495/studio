@@ -53,7 +53,7 @@ export default function NotificationPage() {
   };
 
   const sortedNotifications = notifications
-    ? [...notifications].sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+    ? [...notifications].sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime())
     : [];
 
   return (
