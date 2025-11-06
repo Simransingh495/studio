@@ -25,8 +25,6 @@ function RealtimeNotificationListener() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  // Simplified query to only filter by userId, which is more robust for security rules.
-  // The isRead check will be handled on the client.
   const notificationsQuery = useMemoFirebase(
     () =>
       user
