@@ -174,6 +174,10 @@ export default function RequestBloodPage() {
         setIsLoading(false);
     }
   }
+  
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
