@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import * as geofire from 'geofire-common';
 
@@ -83,51 +83,55 @@ export default function RequestBloodPage() {
     }
    }, [user, form]);
 
-  useEffect(() => {
-    if (isClient) {
-        if (navigator.geolocation) {
-        setIsLocationLoading(true);
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-            try {
-                const { latitude, longitude } = position.coords;
-                setUserCoords({ lat: latitude, lon: longitude });
-                const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-                );
-                const data = await response.json();
-                if (data.address) {
-                    const { road, suburb, city, town, state, postcode } = data.address;
-                    const locationParts = [road, suburb, city || town, state, postcode];
-                    const locationString = locationParts.filter(Boolean).join(', ');
-                    if (locationString) {
-                        form.setValue('location', locationString);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching location name:', error);
-                toast({
-                variant: 'destructive',
-                title: 'Could not fetch location name',
-                description: 'Please enter your location manually.',
-                });
-            } finally {
-                setIsLocationLoading(false);
+  const handleFetchLocation = () => {
+    if (navigator.geolocation) {
+      setIsLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            setUserCoords({ lat: latitude, lon: longitude });
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+            const data = await response.json();
+            if (data.address) {
+              const { road, suburb, city, town, state, postcode } = data.address;
+              const locationParts = [road, suburb, city || town, state, postcode];
+              const locationString = locationParts.filter(Boolean).join(', ');
+              if (locationString) {
+                form.setValue('location', locationString);
+              }
             }
-            },
-            (error) => {
-            console.error('Geolocation error:', error);
+          } catch (error) {
+            console.error('Error fetching location name:', error);
             toast({
-                variant: 'destructive',
-                title: 'Location permission denied',
-                description: 'Please enable location services or enter your location manually.',
+              variant: 'destructive',
+              title: 'Could not fetch location name',
+              description: 'Please enter your location manually.',
             });
+          } finally {
             setIsLocationLoading(false);
-            }
-        );
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Location permission denied',
+            description: 'Please enable location services or enter your location manually.',
+          });
+          setIsLocationLoading(false);
         }
+      );
+    } else {
+       toast({
+        variant: 'destructive',
+        title: 'Location Not Supported',
+        description: 'Geolocation is not supported by this browser.',
+      });
     }
-  }, [form, toast, isClient]);
+  };
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -240,10 +244,22 @@ export default function RequestBloodPage() {
                     <FormItem>
                       <FormLabel>Hospital/Location</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Input placeholder="e.g., Apollo Hospital, Delhi" {...field} />
-                           {isClient && isLocationLoading && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
-                        </div>
+                          <div className="relative">
+                            <Input placeholder="e.g., Apollo Hospital, Delhi" {...field} className="pr-10" />
+                            <button
+                              type="button"
+                              onClick={handleFetchLocation}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
+                              aria-label="Get current location"
+                              disabled={isLocationLoading}
+                            >
+                              {isLocationLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <MapPin className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -324,7 +340,7 @@ export default function RequestBloodPage() {
                     </FormItem>
                   )}
                 />
-              <Button type="submit" disabled={isLoading || (isClient && isLocationLoading)} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button type="submit" disabled={isLoading || isLocationLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Submit Request
               </Button>

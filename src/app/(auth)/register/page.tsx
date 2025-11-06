@@ -6,7 +6,7 @@ import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import * as geofire from 'geofire-common';
 
 import { Button } from '@/components/ui/button';
@@ -85,55 +85,56 @@ export default function RegisterPage() {
       location: '',
     },
   });
-  
-  useEffect(() => {
-    if (isClient) {
-      if (navigator.geolocation) {
-        setIsLocationLoading(true);
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            try {
-              const { latitude, longitude } = position.coords;
-              setUserCoords({
-                lat: latitude,
-                lng: longitude,
-              });
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-              );
-              const data = await response.json();
-               if (data.address) {
-                const { road, suburb, city, town, state, postcode } = data.address;
-                const locationParts = [road, suburb, city || town, state, postcode];
-                const locationString = locationParts.filter(Boolean).join(', ');
-                if (locationString) {
-                  form.setValue('location', locationString);
-                }
+
+  const handleFetchLocation = () => {
+    if (navigator.geolocation) {
+      setIsLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            setUserCoords({ lat: latitude, lng: longitude });
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+            const data = await response.json();
+            if (data.address) {
+              const { road, suburb, city, town, state, postcode } = data.address;
+              const locationParts = [road, suburb, city || town, state, postcode];
+              const locationString = locationParts.filter(Boolean).join(', ');
+              if (locationString) {
+                form.setValue('location', locationString);
               }
-            } catch (err) {
-               console.error("Could not fetch location name:", err);
-               toast({
-                  variant: 'destructive',
-                  title: 'Could not fetch location name',
-                  description: "Please enter your location manually.",
-                });
-            } finally {
-              setIsLocationLoading(false);
             }
-          },
-          (err) => {
-            console.error("Could not get location:", err.message);
+          } catch (err) {
+            console.error('Could not fetch location name:', err);
             toast({
               variant: 'destructive',
-              title: 'Location Error',
-              description: "Could not get your location. Please enter it manually.",
+              title: 'Could not fetch location name',
+              description: 'Please enter your location manually.',
             });
+          } finally {
             setIsLocationLoading(false);
           }
-        );
-      }
+        },
+        (err) => {
+          console.error('Could not get location:', err.message);
+          toast({
+            variant: 'destructive',
+            title: 'Location Error',
+            description: err.message || 'Could not get your location. Please enter it manually.',
+          });
+          setIsLocationLoading(false);
+        }
+      );
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Location Not Supported',
+        description: 'Geolocation is not supported by this browser.',
+      });
     }
-  }, [isClient, form, toast]);
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!auth || !firestore) return;
@@ -184,6 +185,10 @@ export default function RegisterPage() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (!isClient) {
+    return null;
   }
 
   return (
@@ -272,8 +277,20 @@ export default function RegisterPage() {
                     <FormLabel>Location</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input placeholder="e.g., 123 Main St, San Francisco, CA" {...field} />
-                        {isClient && isLocationLoading && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                        <Input placeholder="e.g., 123 Main St, San Francisco, CA" {...field} className="pr-10" />
+                        <button
+                          type="button"
+                          onClick={handleFetchLocation}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
+                          aria-label="Get current location"
+                          disabled={isLocationLoading}
+                        >
+                          {isLocationLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <MapPin className="h-4 w-4" />
+                          )}
+                        </button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -307,7 +324,7 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || (isClient && isLocationLoading)}>
+            <Button type="submit" className="w-full" disabled={isLoading || isLocationLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
