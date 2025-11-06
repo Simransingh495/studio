@@ -277,7 +277,7 @@ export default function RegisterPage() {
                     <FormLabel>Location</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input placeholder="e.g., 123 Main St, San Francisco, CA" {...field} className="pr-10" />
+                        <Input placeholder="e.g., MG Road, Bengaluru, KA" {...field} className="pr-10" />
                         <button
                           type="button"
                           onClick={handleFetchLocation}

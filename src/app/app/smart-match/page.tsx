@@ -134,7 +134,7 @@ export default function SmartMatchPage() {
                   <FormItem className="w-full sm:w-auto flex-1">
                     <FormLabel>Patient Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., New York, NY" {...field} />
+                      <Input placeholder="e.g., Delhi, IN" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

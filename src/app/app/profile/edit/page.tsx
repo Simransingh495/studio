@@ -162,7 +162,7 @@ export default function EditProfilePage() {
                     <FormItem>
                         <FormLabel>City, State</FormLabel>
                         <FormControl>
-                        <Input placeholder="e.g., San Francisco, CA" {...field} />
+                        <Input placeholder="e.g., Bengaluru, KA" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
