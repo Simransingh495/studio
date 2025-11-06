@@ -121,15 +121,15 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="bg-primary pb-24 pt-6 text-primary-foreground">
-        <div className="container mx-auto max-w-md px-4 text-center">
-          <h2 className="text-xl font-semibold">Profile</h2>
+    <div className="flex h-full flex-col bg-background sm:bg-secondary">
+      <div className="bg-primary pb-24 pt-6 text-primary-foreground sm:bg-transparent sm:pb-0 sm:pt-0 sm:text-inherit">
+        <div className="container mx-auto max-w-md px-4 text-center sm:hidden">
+          <h2 className="text-xl font-semibold text-primary-foreground">Profile</h2>
         </div>
       </div>
-      <div className="-mt-20 flex-1 bg-secondary">
+      <div className="sm:-mt-0 -mt-20 flex-1 bg-secondary">
         <div className="container mx-auto max-w-md p-4">
-          <Card className="transform -translate-y-12 rounded-2xl">
+          <Card className="transform sm:-translate-y-0 -translate-y-12 rounded-2xl">
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center">
                 <Avatar className="h-24 w-24 border-4 border-primary/50">
@@ -146,8 +146,8 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <div className="transform -translate-y-6">
-            <Card className="rounded-2xl">
+          <div className="transform sm:-translate-y-0 -translate-y-6">
+            <Card className="mt-4 sm:mt-6 rounded-2xl">
               <CardContent className="flex justify-around p-4 text-center">
                 {stats.map((stat) => (
                   <div key={stat.label}>
@@ -160,13 +160,13 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="mt-4 rounded-2xl">
-              <CardContent className="p-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center justify-between rounded-lg p-2 hover:bg-secondary">
+            <Card className="mt-4 sm:mt-6 rounded-2xl">
+              <CardContent className="p-2 sm:p-4">
+                <ul className="space-y-1 sm:space-y-2">
+                  <li className="flex items-center justify-between rounded-lg p-3 hover:bg-secondary">
                     <div className="flex items-center gap-4">
                       <span className="font-semibold">
-                        Available for Donate
+                        Available to Donate
                       </span>
                     </div>
                     <Switch

@@ -38,46 +38,49 @@ export default function AdminDonationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Donation ID</TableHead>
-                <TableHead>Donor Name</TableHead>
-                <TableHead>Blood Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Donation Date</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {donations.map((donation) => (
-                <TableRow key={donation.id}>
-                  <TableCell className="font-medium">{donation.id}</TableCell>
-                  <TableCell>{donation.donorName}</TableCell>
-                  <TableCell>{donation.bloodType}</TableCell>
-                  <TableCell>{donation.location}</TableCell>
-                  <TableCell>{donation.donationDate}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Verify Donation</DropdownMenuItem>
-                      </DropdownMenuContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Donation ID</TableHead>
+                  <TableHead>Donor Name</TableHead>
+                  <TableHead>Blood Type</TableHead>
+                  <TableHead className="hidden sm:table-cell">Location</TableHead>
+                  <TableHead>Donation Date</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {donations.map((donation) => (
+                  <TableRow key={donation.id}>
+                    <TableCell className="font-medium">{donation.id}</TableCell>
+                    <TableCell>{donation.donorName}</TableCell>
+                    <TableCell>{donation.bloodType}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{donation.location}</TableCell>
+                    <TableCell>{donation.donationDate}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem>Verify Donation</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

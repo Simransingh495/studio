@@ -99,7 +99,7 @@ export default function Home() {
       <MainHeader />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative flex h-[60vh] min-h-[500px] w-full items-center justify-center bg-primary/10 text-center text-primary-foreground">
+        <section className="relative flex h-[70vh] min-h-[500px] w-full items-center justify-center bg-primary/10 py-12 text-center text-primary-foreground sm:h-[60vh]">
           {heroImage && (
             <Image
               src={heroImage.imageUrl}
@@ -114,7 +114,7 @@ export default function Home() {
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
               Connecting Blood Donors With Patients In Need
             </h1>
-            <p className="mt-6 text-lg text-foreground/80">
+            <p className="mt-6 text-lg text-foreground/80 md:text-xl">
               Join our community of lifesavers. Your donation can make a world
               of difference.
             </p>
@@ -162,7 +162,7 @@ export default function Home() {
               <h2 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
                 Our Mission
               </h2>
-              <p className="mt-4 text-xl text-muted-foreground">
+              <p className="mt-4 text-lg text-muted-foreground md:text-xl">
                 To build a future where every person has access to safe and timely blood transfusions. We are on a relentless mission to eliminate blood shortages by creating an intelligent, compassionate, and interconnected global network of donors and recipients.
               </p>
                <p className="mt-4 text-muted-foreground">
@@ -229,7 +229,7 @@ export default function Home() {
 
 
         {/* Features Section */}
-        <section id="features" className="bg-primary/5 py-16 sm:py-24">
+        <section id="features" className="bg-background py-16 sm:py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -239,7 +239,7 @@ export default function Home() {
                 We've built a suite of powerful tools designed to make the process of donating and receiving blood simpler and more efficient than ever before. Explore how our technology is making a difference.
               </p>
             </div>
-            <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-2 lg:grid-cols-2">
+            <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-2">
               {features.map((feature) => (
                 <div key={feature.title} className="flex items-start gap-4">
                   <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -289,12 +289,12 @@ export default function Home() {
         </section>
       </main>
       <footer id="contact" className="border-t bg-background">
-        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row">
-          <div className="flex flex-col items-center text-center sm:text-left sm:items-start">
+        <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 py-8 sm:flex-row sm:gap-4">
+          <div className="flex flex-col items-center text-center sm:items-start">
             <Link href="/">
               <Logo className="text-primary" />
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-2">
               Saving lives, one drop at a time.
             </p>
           </div>

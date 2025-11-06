@@ -39,76 +39,78 @@ export default function AdminRequestsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Patient Name</TableHead>
-                <TableHead>Blood Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Urgency</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bloodRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell className="font-medium">
-                    {request.patientName}
-                  </TableCell>
-                  <TableCell>{request.bloodType}</TableCell>
-                  <TableCell>{request.location}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        request.urgency === 'High'
-                          ? 'destructive'
-                          : request.urgency === 'Medium'
-                          ? 'secondary'
-                          : 'outline'
-                      }
-                    >
-                      {request.urgency}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        request.status === 'Fulfilled'
-                          ? 'default'
-                          : request.status === 'Pending'
-                          ? 'secondary'
-                          : 'outline'
-                      }
-                      className={request.status === 'Fulfilled' ? 'bg-green-600' : ''}
-                    >
-                      {request.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{request.createdAt}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Mark as Fulfilled</DropdownMenuItem>
-                        <DropdownMenuItem>Cancel Request</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Patient Name</TableHead>
+                  <TableHead>Blood Type</TableHead>
+                  <TableHead className="hidden sm:table-cell">Location</TableHead>
+                  <TableHead>Urgency</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {bloodRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">
+                      {request.patientName}
+                    </TableCell>
+                    <TableCell>{request.bloodType}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{request.location}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          request.urgency === 'High'
+                            ? 'destructive'
+                            : request.urgency === 'Medium'
+                            ? 'secondary'
+                            : 'outline'
+                        }
+                      >
+                        {request.urgency}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          request.status === 'Fulfilled'
+                            ? 'default'
+                            : request.status === 'Pending'
+                            ? 'secondary'
+                            : 'outline'
+                        }
+                        className={request.status === 'Fulfilled' ? 'bg-green-600' : ''}
+                      >
+                        {request.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{request.createdAt}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem>Mark as Fulfilled</DropdownMenuItem>
+                          <DropdownMenuItem>Cancel Request</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

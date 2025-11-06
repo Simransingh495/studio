@@ -133,18 +133,36 @@ export default function OverviewPage() {
         {!isLoading && recentRequests && recentRequests.length > 0 ? (
           recentRequests.map((request) => (
             <Card key={request.id}>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10">
-                  <div className="flex flex-col items-center">
-                    <span className="font-bold text-2xl text-primary">
-                      {request.bloodType.slice(0, -1)}
-                    </span>
-                    <span className="text-sm text-primary">
-                      {request.bloodType.slice(-1)}
-                    </span>
-                  </div>
+              <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4">
+                <div className="flex w-full sm:w-auto items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                    <div className="flex flex-col items-center">
+                        <span className="font-bold text-2xl text-primary">
+                        {request.bloodType.slice(0, -1)}
+                        </span>
+                        <span className="text-sm text-primary">
+                        {request.bloodType.slice(-1)}
+                        </span>
+                    </div>
+                    </div>
+                    <div className="flex-1 sm:hidden">
+                        <div className="font-semibold flex items-center gap-2">
+                            <Badge
+                            variant={
+                                request.urgency === 'High' ? 'destructive' : 'secondary'
+                            }
+                            >
+                            {request.urgency}
+                            </Badge>{' '}
+                            Urgency
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            {request.location}
+                        </p>
+                    </div>
                 </div>
-                <div className="flex-1">
+
+                <div className="flex-1 hidden sm:block">
                   <div className="font-semibold flex items-center gap-2">
                     <Badge
                       variant={
@@ -163,11 +181,12 @@ export default function OverviewPage() {
                     {request.createdAt.toDate().toLocaleDateString()}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex w-full sm:w-auto flex-row gap-2">
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => handleShare(request)}
+                    className="flex-1"
                   >
                     <Share className="mr-2 h-4 w-4" />
                     Share
@@ -176,6 +195,7 @@ export default function OverviewPage() {
                     size="sm"
                     onClick={() => handleAccept(request)}
                     disabled={donating === request.id}
+                    className="flex-1"
                   >
                     {donating === request.id ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

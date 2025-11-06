@@ -118,30 +118,32 @@ export default function AdminOverviewPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Blood Type</TableHead>
-                  <TableHead>Role</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.bloodType}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead>Blood Type</TableHead>
+                    <TableHead>Role</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
+                      <TableCell>{user.bloodType}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

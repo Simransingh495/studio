@@ -99,9 +99,9 @@ export default function RequestBloodPage() {
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
             );
             const data = await response.json();
-            if (data.address) {
-              const { road, suburb, city, town, state, postcode } = data.address;
-              const locationParts = [road, suburb, city || town, state, postcode];
+             if (data.address) {
+              const { road, suburb, city, town, village, state, postcode, country } = data.address;
+              const locationParts = [road, suburb, city || town || village, state, postcode, country];
               const locationString = locationParts.filter(Boolean).join(', ');
               if (locationString) {
                 form.setValue('location', locationString);
@@ -388,7 +388,7 @@ export default function RequestBloodPage() {
                             <p className="font-semibold">{hospital.name}</p>
                             <p className="text-sm text-muted-foreground">{hospital.address}</p>
                         </div>
-                         <p className="text-sm font-medium text-muted-foreground">{hospital.distance.toFixed(1)} km away</p>
+                         <p className="text-sm font-medium text-muted-foreground whitespace-nowrap">{hospital.distance.toFixed(1)} km</p>
                     </div>
                 ))}
             </CardContent>

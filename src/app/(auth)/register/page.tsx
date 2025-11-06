@@ -99,8 +99,8 @@ export default function RegisterPage() {
             );
             const data = await response.json();
             if (data.address) {
-              const { road, suburb, city, town, state, postcode } = data.address;
-              const locationParts = [road, suburb, city || town, state, postcode];
+              const { road, suburb, city, town, village, state, postcode, country } = data.address;
+              const locationParts = [road, suburb, city || town || village, state, postcode, country];
               const locationString = locationParts.filter(Boolean).join(', ');
               if (locationString) {
                 form.setValue('location', locationString);
@@ -202,7 +202,7 @@ export default function RegisterPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="firstName"
