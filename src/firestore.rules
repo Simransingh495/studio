@@ -74,8 +74,8 @@ service cloud.firestore {
       // Allow any authenticated user to create a blood request.
       allow create: if request.auth != null;
 
-      // Allow any authenticated user to read or list blood requests.
-      allow get, list: if request.auth != null;
+      // Allow any user (authenticated or not) to read or list blood requests.
+      allow get, list: if true;
 
       // Allow only the owner (requesting user) to update the blood request.
       allow update: if isExistingOwner();
@@ -93,33 +93,23 @@ service cloud.firestore {
      * @principle Allows creation of donation matches but restricts modification.
      */
     match /donationMatches/{donationMatchId} {
-
-      function isRequestOwner() {
-        let requestDoc = get(/databases/$(database)/documents/bloodRequests/$(request.resource.data.requestId));
-        return request.auth.uid == requestDoc.data.userId;
-      }
-
-      function isDonor() {
-        return request.auth.uid == request.resource.data.donorId;
-      }
-      
-      function isExistingRequestOwner() {
-          let requestDoc = get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId));
-          return request.auth.uid == requestDoc.data.userId;
-      }
-
-      function isExistingDonor() {
-        return request.auth.uid == resource.data.donorId;
-      }
-
       // Allow any authenticated user to create a donation match.
       allow create: if request.auth != null;
 
       // Allow anyone to read or list donation matches
-      allow get, list: if request.auth != null;
+      allow get, list: if true;
+
+      function isRequestOwner() {
+        let requestDoc = get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId));
+        return request.auth.uid == requestDoc.data.userId;
+      }
+
+      function isDonor() {
+        return request.auth.uid == resource.data.donorId;
+      }
 
       // Allow only the involved parties to update the match (e.g., to accept/reject).
-      allow update: if isExistingRequestOwner() || isExistingDonor();
+      allow update: if isRequestOwner() || isDonor();
 
       // Prevent deletion of donation matches.
       allow delete: if false;
