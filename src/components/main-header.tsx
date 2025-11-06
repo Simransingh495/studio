@@ -9,7 +9,6 @@ export function MainHeader() {
     { href: '/', label: 'Home' },
     { href: '#about', label: 'About' },
     { href: '#features', label: 'Features' },
-    { href: '/admin', label: 'Admin' },
   ];
 
   return (
