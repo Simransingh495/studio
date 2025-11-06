@@ -47,6 +47,7 @@ export default function ProfilePage() {
   const { data: requests } = useCollection(requestsQuery);
 
   const handleLogout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
       toast({ title: 'Logged out successfully' });
