@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -172,7 +173,7 @@ export default function Home() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="bg-secondary/50 py-16 sm:py-24">
+        <section id="about" className="bg-secondary py-16 sm:py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -228,7 +229,7 @@ export default function Home() {
 
 
         {/* Features Section */}
-        <section id="features" className="bg-background py-16 sm:py-24">
+        <section id="features" className="bg-primary/5 py-16 sm:py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -260,7 +261,7 @@ export default function Home() {
         
 
         {/* Join Community Section */}
-        <section className="relative bg-primary/5 py-16 sm:py-24">
+        <section className="relative bg-secondary py-16 sm:py-24">
           {communityImage && (
             <Image
               src={communityImage.imageUrl}
@@ -326,3 +327,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
