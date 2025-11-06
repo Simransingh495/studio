@@ -307,7 +307,7 @@ export default function RequestBloodPage() {
                     <FormItem>
                       <FormLabel>Contact Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input placeholder="name@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -321,7 +321,7 @@ export default function RequestBloodPage() {
                     <FormItem>
                       <FormLabel>Contact Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="+91 98765 43210" {...field} />
+                        <Input placeholder="e.g. 9876543210" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
