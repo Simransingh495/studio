@@ -97,10 +97,12 @@ export default function RequestBloodPage() {
                 );
                 const data = await response.json();
                 if (data.address) {
-                const locationString = `${data.address.city || data.address.town || ''}, ${data.address.state || ''}`;
-                if (locationString.length > 2) {
-                    form.setValue('location', locationString);
-                }
+                    const { road, suburb, city, town, state, postcode } = data.address;
+                    const locationParts = [road, suburb, city || town, state, postcode];
+                    const locationString = locationParts.filter(Boolean).join(', ');
+                    if (locationString) {
+                        form.setValue('location', locationString);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching location name:', error);
@@ -158,7 +160,7 @@ export default function RequestBloodPage() {
       await addDoc(requestsCollection, newRequest);
       toast({
         title: 'Request Submitted',
-        description: 'Your blood request has been broadcasted. You will be notified by email if a donor responds.',
+        description: 'Your blood request has been broadcasted. You will be notified when a donor responds.',
       });
       form.reset();
        if (user?.email) {
@@ -187,7 +189,7 @@ export default function RequestBloodPage() {
           <CardTitle>Create a New Blood Request</CardTitle>
           <CardDescription>
             Fill out the form below to find a donor. Your request will be sent to
-            donors, and you will be notified via email/SMS.
+            donors, and you will be notified when a match is found.
           </CardDescription>
         </CardHeader>
         <CardContent>

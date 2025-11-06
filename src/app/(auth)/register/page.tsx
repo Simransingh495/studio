@@ -103,8 +103,10 @@ export default function RegisterPage() {
               );
               const data = await response.json();
                if (data.address) {
-                const locationString = `${data.address.city || data.address.town || ''}, ${data.address.state || ''}`;
-                if (locationString.length > 2) {
+                const { road, suburb, city, town, state, postcode } = data.address;
+                const locationParts = [road, suburb, city || town, state, postcode];
+                const locationString = locationParts.filter(Boolean).join(', ');
+                if (locationString) {
                   form.setValue('location', locationString);
                 }
               }
@@ -267,10 +269,10 @@ export default function RegisterPage() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City, State</FormLabel>
+                    <FormLabel>Location</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input placeholder="e.g., San Francisco, CA" {...field} />
+                        <Input placeholder="e.g., 123 Main St, San Francisco, CA" {...field} />
                         {isClient && isLocationLoading && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
                       </div>
                     </FormControl>
