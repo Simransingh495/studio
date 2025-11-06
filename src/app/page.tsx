@@ -290,34 +290,34 @@ export default function Home() {
       </main>
       <footer className="border-t bg-background">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row">
-          <div className="flex flex-col items-center sm:items-start">
+          <div className="flex flex-col items-center text-center sm:text-left sm:items-start">
             <Link href="/">
-                <Logo className="text-primary" />
+              <Logo className="text-primary" />
             </Link>
             <p className="text-sm text-muted-foreground">
               Saving lives, one drop at a time.
             </p>
           </div>
-          <div className="flex flex-col items-center gap-2 sm:items-end">
-            <div className="flex flex-col items-center gap-2 sm:items-end">
-                <p className="text-sm font-semibold text-muted-foreground">Contact Us</p>
-                <div className="flex gap-4">
-                    <a href="https://www.linkedin.com/in/simran-singh" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
-                      <Linkedin className="h-6 w-6" />
-                      <span className="sr-only">LinkedIn</span>
-                    </a>
-                    <a href="https://x.com/SimranSing67957" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
-                      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                      </svg>
-                      <span className="sr-only">X</span>
-                    </a>
-                    <a href="mailto:singhsimran56161@gmail.com" className="text-muted-foreground hover:text-primary">
-                      <Mail className="h-6 w-6" />
-                      <span className="sr-only">Email</span>
-                    </a>
-                </div>
-            </div>
+          <div className="flex flex-col items-center gap-2">
+              <p className="text-sm font-semibold text-muted-foreground">Contact Us</p>
+              <div className="flex gap-4">
+                  <a href="https://www.linkedin.com/in/simran-singh" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                    <Linkedin className="h-6 w-6" />
+                    <span className="sr-only">LinkedIn</span>
+                  </a>
+                  <a href="https://x.com/SimranSing67957" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    <span className="sr-only">X</span>
+                  </a>
+                  <a href="mailto:singhsimran56161@gmail.com" className="text-muted-foreground hover:text-primary">
+                    <Mail className="h-6 w-6" />
+                    <span className="sr-only">Email</span>
+                  </a>
+              </div>
+          </div>
+          <div className="flex flex-col items-center text-center sm:text-right sm:items-end">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} BloodSync. All rights reserved.
             </p>
@@ -327,5 +327,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
