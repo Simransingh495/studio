@@ -95,6 +95,12 @@ service cloud.firestore {
      */
     match /donationMatches/{donationMatchId} {
 
+      // Allow any authenticated user to create a donation match.
+      allow create: if request.auth != null;
+
+      // Allow anyone to read or list donation matches
+      allow get, list: if request.auth != null;
+
       function isRequestOwner() {
         let requestDoc = get(/databases/$(database)/documents/bloodRequests/$(resource.data.requestId));
         return request.auth.uid == requestDoc.data.userId;
@@ -103,12 +109,6 @@ service cloud.firestore {
       function isDonor() {
         return request.auth.uid == resource.data.donorId;
       }
-
-      // Allow any authenticated user to create a donation match.
-      allow create: if request.auth != null;
-
-      // Allow anyone to read or list donation matches
-      allow get, list: if request.auth != null;
 
       // Allow only the involved parties to update the match (e.g., to accept/reject).
       allow update: if isRequestOwner() || isDonor();
@@ -135,7 +135,7 @@ service cloud.firestore {
 
       // Allow authenticated users to list ONLY their own donations.
       // The client query MUST filter by donorId for this to be allowed.
-      allow list: if request.auth != null && request.query.where.get('donorId', ['==', request.auth.uid]).size() == 1;
+      allow list: if request.auth != null && request.query.where != null && request.query.where.get('donorId', ['==', request.auth.uid]).size() == 1;
 
       // Prevent updates and deletions to maintain data integrity.
       allow update, delete: if false;

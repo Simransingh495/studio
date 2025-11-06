@@ -19,12 +19,13 @@ export default function DonationHistoryPage() {
   const { user } = useUser();
 
   const donationsQuery = useMemoFirebase(
-    () => user ? query(
-      collection(firestore, 'donations'),
-      where('donorId', '==', user.uid)
-      // Removing orderBy to prevent Firestore internal assertion error
-      // orderBy('donationDate', 'desc') 
-    ) : null,
+    () =>
+      user
+        ? query(
+            collection(firestore, 'donations'),
+            where('donorId', '==', user.uid)
+          )
+        : null,
     [firestore, user]
   );
   
